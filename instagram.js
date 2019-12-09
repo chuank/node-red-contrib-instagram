@@ -406,86 +406,76 @@ module.exports = function(RED) {
 			}
 		}));
 
-		var urlformat = Url.format({
-			protocol: "https",
-			hostname: "api.instagram.com",
-			pathname: "/oauth/authorize/",
-			query: {
-				client_id: credentials.client_id,
-				redirect_uri: credentials.redirect_uri,
-				response_type: "code",
-				state: node_id + ":" + credentials.csrfToken
-			}
-		});
-
-		console.log(urlformat);
-
 		RED.nodes.addCredentials(node_id,credentials);
 	});
 
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
-		console.log(res.toString());
 
-		var state = req.query.state.split(":");
-		var node_id = state[0];
-		var csrfToken = state[1];
+		console.log(req);
+		// https://iota.chuank.com/instagram-credentials/auth/callback?code=AQAlxiGlmOK_eoi7pStpC6yXj8aUOg0y6NN3w1k2DVd8ag6sAYDi_88OH1nCs21K2kWYalqnf8dHWg378XTUUnrRWWWTMRoN2kaSbydZU6hv4GxJlcE8VEhPctXcmyU17txonpW8kHQMeIQkp4qDa5tqgpPyVxOOABDXzHvRlNcXUjfrRunvRFalE_aDm7ZTOUUfz7sHY8JTmHkHvM84lTVSOoJsrThDACazJup6Qi3Sow
+		// &state=f9fee341.72a38:xUNsTqqO4K7dyVRj7aT8hkQW
 
-		var credentials = RED.nodes.getCredentials(node_id) || {};
 
-		if (!credentials || !credentials.client_id || !credentials.client_secret || ! credentials.redirect_uri) {
-			return res.send(RED._("instagram.error.no-credentials"));
-		}
-
-		if (csrfToken !== credentials.csrfToken) {
-			return res.status(401).send(RED._("instagram.error.csrf-token-mismatch"));
-		}
-
-		RED.nodes.deleteCredentials(node_id); // we don't want to keep the csrfToken
-		// from now on, credentials are in memory only
-		delete credentials.csrfToken;
-
-		if(!req.query.code) {
-			return res.status(400).send(RED._("instagram.error.no-required-code"));
-		}
-
-		credentials.code = req.query.code;
-
-		request.post({
-			url: "https://api.instagram.com/oauth/access_token",
-			json: true,
-			form: {
-				app_id: credentials.client_id,
-				app_secret: credentials.client_secret,
-				grant_type: "authorization_code",
-				redirect_uri: credentials.redirect_uri,
-				code: credentials.code
-			},
-		}, function(err, result, data) {
-			if (err) {
-				return res.send(RED._("instagram.error.request-error", {err: err}));
-			}
-			if (data.error) {
-				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
-			}
-
-			if(result.statusCode !== 200) {
-				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
-			}
-
-			if(data.user.username) {
-				credentials.username = data.user.username;
-			} else {
-				return res.send(RED._("instagram.error.username-fetch-fail"));
-			}
-
-			if(data.access_token) {
-				credentials.access_token = data.access_token;
-			} else {
-				return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
-			}
-
-			RED.nodes.addCredentials(node_id,credentials);
-			res.send(RED._("instagram.message.authorized"));
-		});
+		// var state = req.query.state.split(":");
+		// var node_id = state[0];
+		// var csrfToken = state[1];
+		//
+		// var credentials = RED.nodes.getCredentials(node_id) || {};
+		//
+		// if (!credentials || !credentials.client_id || !credentials.client_secret || ! credentials.redirect_uri) {
+		// 	return res.send(RED._("instagram.error.no-credentials"));
+		// }
+		//
+		// if (csrfToken !== credentials.csrfToken) {
+		// 	return res.status(401).send(RED._("instagram.error.csrf-token-mismatch"));
+		// }
+		//
+		// RED.nodes.deleteCredentials(node_id); // we don't want to keep the csrfToken
+		// // from now on, credentials are in memory only
+		// delete credentials.csrfToken;
+		//
+		// if(!req.query.code) {
+		// 	return res.status(400).send(RED._("instagram.error.no-required-code"));
+		// }
+		//
+		// credentials.code = req.query.code;
+		//
+		// request.post({
+		// 	url: "https://api.instagram.com/oauth/access_token",
+		// 	json: true,
+		// 	form: {
+		// 		app_id: credentials.client_id,
+		// 		app_secret: credentials.client_secret,
+		// 		grant_type: "authorization_code",
+		// 		redirect_uri: credentials.redirect_uri,
+		// 		code: credentials.code
+		// 	},
+		// }, function(err, result, data) {
+		// 	if (err) {
+		// 		return res.send(RED._("instagram.error.request-error", {err: err}));
+		// 	}
+		// 	if (data.error) {
+		// 		return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+		// 	}
+		//
+		// 	if(result.statusCode !== 200) {
+		// 		return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
+		// 	}
+		//
+		// 	if(data.user.username) {
+		// 		credentials.username = data.user.username;
+		// 	} else {
+		// 		return res.send(RED._("instagram.error.username-fetch-fail"));
+		// 	}
+		//
+		// 	if(data.access_token) {
+		// 		credentials.access_token = data.access_token;
+		// 	} else {
+		// 		return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
+		// 	}
+		//
+		// 	RED.nodes.addCredentials(node_id,credentials);
+		// 	res.send(RED._("instagram.message.authorized"));
+		// });
 	});
 };

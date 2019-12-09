@@ -398,7 +398,7 @@ module.exports = function(RED) {
 			hostname: "api.instagram.com",
 			pathname: "/oauth/authorize/",
 			query: {
-				client_id: credentials.client_id,
+				app_id: credentials.client_id,
 				redirect_uri: credentials.redirect_uri,
 				response_type: "code",
 				state: node_id + ":" + credentials.csrfToken

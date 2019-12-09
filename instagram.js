@@ -454,8 +454,8 @@ module.exports = function(RED) {
 			url: "https://api.instagram.com/oauth/access_token",
 			json: true,
 			form: {
-				client_id: credentials.client_id,
-				client_secret: credentials.client_secret,
+				app_id: credentials.client_id,
+				app_secret: credentials.client_secret,
 				grant_type: "authorization_code",
 				redirect_uri: credentials.redirect_uri,
 				code: credentials.code

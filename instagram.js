@@ -465,7 +465,7 @@ module.exports = function(RED) {
 			}
 
 			if(data.user_id) {
-				credentials.user_id = data.user.user_id;
+				credentials.user_id = data.user_id;
 			} else {
 				return res.send(RED._("instagram.error.user_id-fetch-fail"));
 			}

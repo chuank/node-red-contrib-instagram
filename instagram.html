@@ -45,9 +45,9 @@
     </div>
     <div id="node-config-instagram-user">
         <div class="form-row">
-            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagram-username" class="input-xlarge uneditable-input"></span>
+            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagram-user_id" class="input-xlarge uneditable-input"></span>
         </div>
-        <input type="hidden" id="node-config-input-username">
+        <input type="hidden" id="node-config-input-user_id">
     </div>
 </script>
 
@@ -138,16 +138,16 @@
 	RED.nodes.registerType("instagram-credentials",{
 		category: "config",
 		defaults: {
-			username: {value:""}
+			user_id: {value:""}
 		},
 		credentials: {
-			username: {type:"text"},
+			user_id: {type:"text"},
 			clientID: {type:"text"},
 			redirectURI: { type:"text"},
 			access_token: { type:"password"}
 		},
 		label: function() {
-			return this.username;
+			return this.user_id;
 		},
 		exportable: false,
 		oneditprepare: function() {
@@ -171,15 +171,15 @@
 			function updateInstagramScreenName(sn) {
 				$("#node-config-instagram-app-keys").hide();
 				$("#node-config-instagram-user").show();
-				$("#node-config-input-username").val(sn);
-				$("#node-config-instagram-username").html(sn);
+				$("#node-config-input-user_id").val(sn);
+				$("#node-config-instagram-user_id").html(sn);
 			}
 
 			function pollInstagramCredentials() {
 				$.getJSON("credentials/instagram-credentials/"+id,function(data) {
-					if (data.username) {
+					if (data.user_id) {
 						$("#node-config-dialog-ok").button("enable");
-						updateInstagramScreenName(data.username);
+						updateInstagramScreenName(data.user_id);
 						delete window.instagramConfigNodeIntervalId;
 					} else {
 						window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials,2000);
@@ -189,8 +189,8 @@
 
 			updateInstagramAuthButton();
 
-			if (this.username) {
-				updateInstagramScreenName(this.username);
+			if (this.user_id) {
+				updateInstagramScreenName(this.user_id);
 			} else {
 				$("#node-config-instagram-app-keys").show();
 				$("#node-config-instagram-user").hide();

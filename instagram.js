@@ -449,6 +449,10 @@ module.exports = function(RED) {
 			},
 		}, function(err, result, data) {
 
+			console.log("################");
+			console.log(data);
+			console.log("################");
+
 			if (err) {
 				return res.send(RED._("instagram.error.request-error", {err: err}));
 			}

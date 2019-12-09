@@ -411,7 +411,8 @@ module.exports = function(RED) {
 
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
 
-		console.log(req);
+		console.log(req.query);
+		
 		// https://iota.chuank.com/instagram-credentials/auth/callback?code=AQAlxiGlmOK_eoi7pStpC6yXj8aUOg0y6NN3w1k2DVd8ag6sAYDi_88OH1nCs21K2kWYalqnf8dHWg378XTUUnrRWWWTMRoN2kaSbydZU6hv4GxJlcE8VEhPctXcmyU17txonpW8kHQMeIQkp4qDa5tqgpPyVxOOABDXzHvRlNcXUjfrRunvRFalE_aDm7ZTOUUfz7sHY8JTmHkHvM84lTVSOoJsrThDACazJup6Qi3Sow
 		// &state=f9fee341.72a38:xUNsTqqO4K7dyVRj7aT8hkQW
 

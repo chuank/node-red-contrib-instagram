@@ -366,7 +366,7 @@ module.exports = function(RED) {
 
 	RED.nodes.registerType("instagram-credentials",InstagramCredentialsNode, {
 		credentials: {
-			username: {type:"text"},
+			user_id: {type:"text"},
 			clientID: {type:"text"},
 			redirectURI: { type:"text"},
 			access_token: {type: "password"}
@@ -449,39 +449,31 @@ module.exports = function(RED) {
 			},
 		}, function(err, result, data) {
 
-			console.log("################");
-			console.log(err);
-			console.log("################");
-			console.log(result);
-			console.log("################");
-			console.log(data);
-			console.log("################");
+			if (err) {
+				return res.send(RED._("instagram.error.request-error", {err: err}));
+			}
+			if (data.error) {
+				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+			}
 
-			// if (err) {
-			// 	return res.send(RED._("instagram.error.request-error", {err: err}));
-			// }
-			// if (data.error) {
-			// 	return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
-			// }
-			//
-			// if(result.statusCode !== 200) {
-			// 	return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
-			// }
-			//
-		// 	if(data.user.username) {
-		// 		credentials.username = data.user.username;
-		// 	} else {
-		// 		return res.send(RED._("instagram.error.username-fetch-fail"));
-		// 	}
-		//
-		// 	if(data.access_token) {
-		// 		credentials.access_token = data.access_token;
-		// 	} else {
-		// 		return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
-		// 	}
-		//
-		// 	RED.nodes.addCredentials(node_id,credentials);
-		// 	res.send(RED._("instagram.message.authorized"));
+			if(result.statusCode !== 200) {
+				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
+			}
+
+			if(data.user_id) {
+				credentials.user_id = data.user.user_id;
+			} else {
+				return res.send(RED._("instagram.error.user_id-fetch-fail"));
+			}
+
+			if(data.access_token) {
+				credentials.access_token = data.access_token;
+			} else {
+				return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
+			}
+
+			RED.nodes.addCredentials(node_id, credentials);
+			res.send(RED._("instagram.message.authorized"));
 		});
 	});
 };

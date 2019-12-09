@@ -47,7 +47,7 @@
             "oauth-error": "oauth error: __error__",
             "no-ui-credentials": "ERROR: Received query from UI without the needed credentials",
             "no-credentials": "ERROR: no credentials - should never happen",
-            "username-fetch-fail": "Error! Instagram node has failed to fetch the username.",
+            "user_id-fetch-fail": "Error! Instagram node has failed to fetch the user_id.",
             "accesstoken-fetch-fail": "Error! Instagram node has failed to fetch a valid access token."
         },
         "message": {

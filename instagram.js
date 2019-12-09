@@ -74,9 +74,9 @@ module.exports = function(RED) {
 		node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
 
 
-		console.log("##############");
-		console.log(node.instagramConfig.credentials.access_token);
-		console.log("##############");
+		// console.log("##############");
+		// console.log(node.instagramConfig.credentials.access_token);
+		// console.log("##############");
 
 
 		// Now grab initial state but only grab the ones we're concerned with
@@ -87,17 +87,21 @@ module.exports = function(RED) {
 					node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
 				}
 
-				if(medias.length > 0) { // if the user has uploaded something to Instagram already
-					node.latestSelfContentID = medias[0].id;
-				}
+				console.log("##############");
+				console.log(medias);
+				console.log("##############");
 
-				node.on("input", function(msg) {
-					msg = {};
-					handleInputNodeInput(node, msg);
-				});
-				node.interval = setInterval(function() { // self trigger
-					node.emit("input", {});
-				}, repeat);
+				// if(medias.length > 0) { // if the user has uploaded something to Instagram already
+				// 	node.latestSelfContentID = medias[0].id;
+				// }
+				//
+				// node.on("input", function(msg) {
+				// 	msg = {};
+				// 	handleInputNodeInput(node, msg);
+				// });
+				// node.interval = setInterval(function() { // self trigger
+				// 	node.emit("input", {});
+				// }, repeat);
 			});
 		} else if (node.inputType === "like") {
 		// 	node.ig.user_self_liked({ count : 1, max_like_id : null}, function(err, medias, pagination, remaining, limit) {

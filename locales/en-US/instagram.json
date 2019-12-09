@@ -10,10 +10,10 @@
             "buffer": "the photo as a buffer",
             "url": "the photo url",
             "name": "Name",
-            "create": "Create your own app at",
+            "create": "Set up your Instagram app at",
             "copy": "Copy the app details here",
-            "clientid": "Client Id",
-            "clientsecret": "Client Secret",
+            "appid": "Instagram App ID",
+            "appsecret": "Instagram App Secret",
             "redirecturi": "Redirect URI",
             "authenticate": "Authenticate with Instagram",
             "instagramuser": "Instagram User"

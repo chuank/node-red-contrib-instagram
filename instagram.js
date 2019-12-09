@@ -71,38 +71,40 @@ module.exports = function(RED) {
 			return;
 		}
 
+		// access tokens are short-lived without app approval, therefore
+		// credentials need to store a time value to check each hour and force
+		// a new token request when appropriate
 		node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
 
-
-		// console.log("##############");
-		// console.log(node.instagramConfig.credentials.access_token);
-		// console.log("##############");
-
+		console.log("##############");
+		console.log(node.instagramConfig.credentials.access_token);
+		console.log("##############");
+		// IGQVJWR285QzQxUGo4V3JkSzBNRERrLTEyZAzBuYnJjdERGYlJNSE80eDM5ZA1RKdnJIR2FESXEwaDREMm1JQjR2VkNqWnk5NjRWdG5ibng2bFcyY3BlSWhud1ZABYm1LOHlLU0RoMjRXbmZAJT2lJWlUxOEkwZA1VzWllsWkVJ
 
 		// Now grab initial state but only grab the ones we're concerned with
 
 		if (node.inputType === "photo") {
-			node.ig.user_media_recent("self", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
-				if (err) {
-					node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
-				}
+			// node.ig.user_media_recent("self", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
+			// 	if (err) {
+			// 		node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
+			// 	}
+			//
+			// 	console.log("##############");
+			// 	console.log(medias);
+			// 	console.log("##############");
 
-				console.log("##############");
-				console.log(medias);
-				console.log("##############");
-
-				// if(medias.length > 0) { // if the user has uploaded something to Instagram already
-				// 	node.latestSelfContentID = medias[0].id;
-				// }
-				//
-				// node.on("input", function(msg) {
-				// 	msg = {};
-				// 	handleInputNodeInput(node, msg);
-				// });
-				// node.interval = setInterval(function() { // self trigger
-				// 	node.emit("input", {});
-				// }, repeat);
-			});
+			// if(medias.length > 0) { // if the user has uploaded something to Instagram already
+			// 	node.latestSelfContentID = medias[0].id;
+			// }
+			//
+			// node.on("input", function(msg) {
+			// 	msg = {};
+			// 	handleInputNodeInput(node, msg);
+			// });
+			// node.interval = setInterval(function() { // self trigger
+			// 	node.emit("input", {});
+			// }, repeat);
+			// });
 		} else if (node.inputType === "like") {
 		// 	node.ig.user_self_liked({ count : 1, max_like_id : null}, function(err, medias, pagination, remaining, limit) {
 		// 		if (err) {
@@ -377,8 +379,8 @@ module.exports = function(RED) {
 	RED.nodes.registerType("instagram-credentials",InstagramCredentialsNode, {
 		credentials: {
 			user_id: {type:"text"},
-			clientID: {type:"text"},
-			redirectURI: { type:"text"},
+			app_id: {type:"text"},
+			redirect_uri: { type:"text"},
 			access_token: {type: "password"}
 		}
 	});
@@ -392,44 +394,47 @@ module.exports = function(RED) {
 
 		var credentials = RED.nodes.getCredentials(node_id) || {};
 
-		credentials.client_id = req.query.client_id;
-		credentials.client_secret = req.query.client_secret;
+		credentials.app_id = req.query.app_id;
+		credentials.app_secret = req.query.app_secret;				// app_secret not registered as type above, so never gets written to disk
 		credentials.redirect_uri = req.query.redirect_uri;
 
-		if (!credentials.client_id || !credentials.client_secret || ! credentials.redirect_uri) {
+		if (!credentials.app_id || !credentials.app_secret || ! credentials.redirect_uri) {
 			return res.send(RED._("instagram.error.no-ui-credentials"));
 		}
 
 		var csrfToken = crypto.randomBytes(18).toString("base64").replace(/\//g, "-").replace(/\+/g, "_");
-		credentials.csrfToken = csrfToken;
+		credentials.csrfToken = csrfToken;										// csrfToken not registered as type above, so never gets written to disk
 
-		res.redirect(Url.format({
+		var url = Url.format({
 			protocol: "https",
 			hostname: "api.instagram.com",
 			pathname: "/oauth/authorize/",
 			query: {
-				app_id: credentials.client_id,
+				app_id: credentials.app_id,												// Instragram Basic Display API now requires 'app_id' instead of 'cliend_id'
 				redirect_uri: credentials.redirect_uri,
 				response_type: "code",
 				scope: "user_profile,user_media",
 				state: node_id + ":" + credentials.csrfToken
 			}
-		}));
+		});
+
+		res.redirect(url);
+
+		console.log("################");
+		console.log("instagram: requesting access token:\n", url);
+		console.log("################");
 
 		RED.nodes.addCredentials(node_id,credentials);
 	});
 
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
-
-		console.log(req.query);
-
 		var state = req.query.state.split(":");
 		var node_id = state[0];
 		var csrfToken = state[1];
 
 		var credentials = RED.nodes.getCredentials(node_id) || {};
 
-		if (!credentials || !credentials.client_id || !credentials.client_secret || ! credentials.redirect_uri) {
+		if (!credentials || !credentials.app_id || !credentials.app_secret || ! credentials.redirect_uri) {
 			return res.send(RED._("instagram.error.no-credentials"));
 		}
 
@@ -451,8 +456,8 @@ module.exports = function(RED) {
 			url: "https://api.instagram.com/oauth/access_token",
 			json: true,
 			form: {
-				app_id: credentials.client_id,
-				app_secret: credentials.client_secret,
+				app_id: credentials.app_id,
+				app_secret: credentials.app_secret,
 				grant_type: "authorization_code",
 				redirect_uri: credentials.redirect_uri,
 				code: credentials.code
@@ -469,7 +474,6 @@ module.exports = function(RED) {
 			if (data.error) {
 				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
 			}
-
 			if(result.statusCode !== 200) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
 			}
@@ -479,7 +483,6 @@ module.exports = function(RED) {
 			} else {
 				return res.send(RED._("instagram.error.user_id-fetch-fail"));
 			}
-
 			if(data.access_token) {
 				credentials.access_token = data.access_token;
 			} else {

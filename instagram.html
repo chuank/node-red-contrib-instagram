@@ -18,7 +18,7 @@
 <script type="text/x-red" data-template-name="instagram-credentials">
     <div id="node-config-instagram-app-keys">
         <div class="form-row">
-            <p style="margin-top: 10px;"><b>1.</b> <span data-i18n="instagram.label.create"></span> <a href="http://instagram.com/developer/clients/register/" target="_blank" style="text-decoration:underline;">instagram.com</a></p>
+            <p style="margin-top: 10px;"><b>1.</b> <span data-i18n="instagram.label.create"></span> <a href="https://developers.facebook.com/docs/instagram-basic-display-api/getting-started" target="_blank" style="text-decoration:underline;">developers.facebook.com</a></p>
         </div>
         <div class="form-tips" id="node-config-tooltip">
             #
@@ -27,12 +27,12 @@
             <p style="margin-top: 10px;"><b>2.</b> <span data-i18n="instagram.label.copy"></span>:</p>
         </div>
         <div class="form-row">
-          <label for="node-config-input-clientID"><i class="fa fa-user"></i> <span data-i18n="instagram.label.clientid"></span></label>
-          <input type="text" id="node-config-input-clientID">
+          <label for="node-config-input-appID"><i class="fa fa-user"></i> <span data-i18n="instagram.label.appid"></span></label>
+          <input type="text" id="node-config-input-appID">
         </div>
-        <div class="form-row" id="node-config-clientSecret">
-            <label for="node-config-input-clientSecret"><i class="fa fa-lock"></i><span data-i18n="instagram.label.clientsecret"></span></label>
-            <input type="password" id="node-config-input-clientSecret">
+        <div class="form-row" id="node-config-appSecret">
+            <label for="node-config-input-appSecret"><i class="fa fa-lock"></i> <span data-i18n="instagram.label.appsecret"></span></label>
+            <input type="password" id="node-config-input-appSecret">
         </div>
         <div class="form-row" id="node-config-redirectURI">
             <label for="node-config-input-redirectURI"><i class="fa fa-user"></i><span data-i18n="instagram.label.redirecturi"></span></label>
@@ -138,16 +138,16 @@
 	RED.nodes.registerType("instagram-credentials",{
 		category: "config",
 		defaults: {
-			user_id: {value:""}
+			user_id: {value: ""}
 		},
 		credentials: {
-			user_id: {type:"text"},
-			clientID: {type:"text"},
-			redirectURI: { type:"text"},
-			access_token: { type:"password"}
+			user_id: {type:"text"},        // Instagram user ID (numerical)
+			app_id: {type:"text"},          // Instagram Basic Display API app_id; appSecret should NEVER be stored!
+			redirectURI: {type:"text"},
+			access_token: {type:"password"}
 		},
 		label: function() {
-			return this.user_id;
+			return this.user_id;           // TODO: change to retrieve username once authenticated
 		},
 		exportable: false,
 		oneditprepare: function() {
@@ -160,13 +160,12 @@
 			var tip = this._("instagram.tip.redirect", {constructedURI: constructedURI});
 
 			function updateInstagramAuthButton() {
-				var v1 = $("#node-config-input-clientID").val();
-				var v2 = $("#node-config-input-clientSecret").val();
-
+				var v1 = $("#node-config-input-appID").val();
+				var v2 = $("#node-config-input-appSecret").val();
 				$("#node-config-start-auth").toggleClass("disabled",(v1.length === 0 || v2.length === 0));
 			}
-			$("#node-config-input-clientID").on("change keydown paste input",updateInstagramAuthButton);
-			$("#node-config-input-clientSecret").on("change keydown paste input",updateInstagramAuthButton);
+			$("#node-config-input-appID").on("change keydown paste input",updateInstagramAuthButton);
+			$("#node-config-input-appSecret").on("change keydown paste input",updateInstagramAuthButton);
 
 			function updateInstagramScreenName(sn) {
 				$("#node-config-instagram-app-keys").hide();
@@ -207,21 +206,21 @@
 			updateRedirectURI();
 
 			$("#node-config-start-auth").mousedown(function() {
-				var clientID = $("#node-config-input-clientID").val();
-				var clientSecret = $("#node-config-input-clientSecret").val();
+				var appID = $("#node-config-input-appID").val();
+				var appSecret = $("#node-config-input-appSecret").val();
 				var redirectURI = $("#node-config-input-redirectURI").val();
 
-				var query = "node_id=" + id + "&client_id=" + clientID + "&client_secret=" + clientSecret + "&redirect_uri=" + redirectURI;
+				var query = "node_id=" + id + "&app_id=" + appID + "&app_secret=" + appSecret + "&redirect_uri=" + redirectURI;
 				var url = "instagram-credentials/auth/?" + query;
 				$(this).attr("href",url);
-				window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials,2000);
+				window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials, 2000);
 			});
 
 			$("#node-config-start-auth").click(function(e) {
-				var clientID = $("#node-config-input-clientID").val();
+				var appID = $("#node-config-input-appID").val();
+				var appSecret = $("#node-config-input-appSecret").val();
 				var redirectURI = $("#node-config-input-redirectURI").val();
-				var clientSecret = $("#node-config-input-redirectURI").val();
-				if (clientID === "" || redirectURI === "" || clientSecret === "") {
+				if (appID === "" || appSecret === "" || redirectURI === "") {
 					e.preventDefault();
 				}
 			});

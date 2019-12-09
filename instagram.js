@@ -417,7 +417,7 @@ module.exports = function(RED) {
 			}
 		});
 
-		this.trace(urlformat);
+		console.log(urlformat);
 
 		RED.nodes.addCredentials(node_id,credentials);
 	});

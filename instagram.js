@@ -95,10 +95,10 @@ module.exports = function(RED) {
 					msg = {};
 					handleInputNodeInput(node, msg);
 				});
-		// 		node.interval = setInterval(function() { // self trigger
-		// 			node.emit("input", {});
-		// 		}, repeat);
-		// 	});
+				node.interval = setInterval(function() { // self trigger
+					node.emit("input", {});
+				}, repeat);
+			});
 		} else if (node.inputType === "like") {
 		// 	node.ig.user_self_liked({ count : 1, max_like_id : null}, function(err, medias, pagination, remaining, limit) {
 		// 		if (err) {

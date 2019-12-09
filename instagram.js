@@ -401,6 +401,7 @@ module.exports = function(RED) {
 				app_id: credentials.client_id,
 				redirect_uri: credentials.redirect_uri,
 				response_type: "code",
+				scope: "user_profile,user_media",
 				state: node_id + ":" + credentials.csrfToken
 			}
 		}));

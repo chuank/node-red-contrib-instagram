@@ -514,9 +514,10 @@ module.exports = function(RED) {
 					}
 
 					console.log("#########data2");
-					console.log(data2);
+					console.log(data2.access_token, data2.expires_in + 10000000);
 					console.log("#########/data2");
 
+					delete credentials.code;
 					credentials.access_token = data2.access_token;
 					credentials.expires_in = Math.floor(Date.now()/1000) + data2.expires_in;
 

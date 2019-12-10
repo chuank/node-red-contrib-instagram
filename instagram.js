@@ -461,12 +461,13 @@ module.exports = function(RED) {
 
 
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
-		console.log("################ callback from instagram triggered ################");
-
 		var state = req.query.state.split(":");
 		var node_id = state[0];
 		var csrfToken = state[1];
 		var callbackState = state[2];
+
+		console.log("################ callback from instagram triggered ################");
+		console.log(state);
 
 		var credentials = RED.nodes.getCredentials(node_id) || {};
 
@@ -487,7 +488,7 @@ module.exports = function(RED) {
 		}
 
 		credentials.code = req.query.code;
-		
+
 		if(callbackState==="0#_") {				// received authorization code; to send out to get a short-lived token
 
 			request.post({

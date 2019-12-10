@@ -29,11 +29,37 @@ module.exports = function(RED) {
 
 		var node = this;
 
-		// node.instagramConfig = RED.nodes.getNode(n.instagram);
-		// var at = node.instagramConfig.credentials.access_token;
-		var a = node.credentials.access_token;
-		console.log("InstagramCredentialsNode initialisation", a);
+		var now = Math.floor(Date.now()/1000);
+		if(node.credentials.expires_in-now > 0) {
+			// we need to trigger a refresh of the access token
 
+			// now that we have the short-lived token, send another request out to exchange for a long-lived one!
+			var refreshUrl = "https://graph.instagram.com/refresh_access_token/" +
+								"?grant_type=ig_refresh_token" +
+								"&access_token=" + node.credentials.access_token;
+
+			request.get(refreshUrl, function(err, res, data){
+				if (err) {
+					return res.send(RED._("instagram.error.request-error", {err: err}));
+				}
+				if (data.error) {
+					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+				}
+				if(res.statusCode !== 200) {
+					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+				}
+
+				var pData = JSON.parse(data);
+
+				node.credentials.access_token = pData.access_token;
+				node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
+
+				RED.nodes.addCredentials(node, node.credentials);
+				res.send(RED._("instagram.message.authorized"));
+			});
+		}
+
+		console.log("InstagramCredentialsNode initialisation");
 
 		// node.interval = setInterval(function() { // self trigger
 		// 	node.emit("input", {});
@@ -497,7 +523,7 @@ module.exports = function(RED) {
 				return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
 			} else {
 
-			// now that we have the short-lived token, send another request out to exchange for a long-lived one!
+				// now that we have the short-lived token, send another request out to exchange for a long-lived one!
 				var llurl = "https://graph.instagram.com/access_token/" +
 									"?grant_type=ig_exchange_token" +
 									"&client_secret=" + credentials.app_secret +
@@ -518,7 +544,7 @@ module.exports = function(RED) {
 
 					delete credentials.code;
 					credentials.access_token = pData2.access_token;
-					credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in;
+					credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
 
 					RED.nodes.addCredentials(node_id, credentials);
 					res.send(RED._("instagram.message.authorized"));

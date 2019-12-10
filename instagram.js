@@ -475,18 +475,29 @@ module.exports = function(RED) {
 					access_token: data.access_token
 				},
 			}, function(err2, result2, data2) {
+
+				if (err2) {
+					return res.send(RED._("instagram.error.request-error", {err: err2}));
+				}
+				if (data2.error) {
+					return res.send(RED._("instagram.error.oauth-error", {error: data2.error}));
+				}
+				if(result2.statusCode !== 200) {
+					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result2.statusCode, data: data2}));
+				}
+
 				console.log("######LL#######");
 				console.log(data2);
 				console.log("######/LL######");
 			});
 
-			if (err || err2) {
+			if (err) {
 				return res.send(RED._("instagram.error.request-error", {err: err}));
 			}
-			if (data.error || data2.error) {
+			if (data.error) {
 				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
 			}
-			if(result.statusCode !== 200 || result2.statusCode !== 200) {
+			if(result.statusCode !== 200) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
 			}
 

@@ -76,10 +76,9 @@ module.exports = function(RED) {
 		// a new token request when appropriate
 		node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
 
-		console.log("##############");
-		console.log(node.instagramConfig.credentials.access_token);
-		console.log("##############");
-		// IGQVJWR285QzQxUGo4V3JkSzBNRERrLTEyZAzBuYnJjdERGYlJNSE80eDM5ZA1RKdnJIR2FESXEwaDREMm1JQjR2VkNqWnk5NjRWdG5ibng2bFcyY3BlSWhud1ZABYm1LOHlLU0RoMjRXbmZAJT2lJWlUxOEkwZA1VzWllsWkVJ
+		// console.log("##############");
+		// console.log(node.instagramConfig.credentials.access_token);
+		// console.log("##############");
 
 		// Now grab initial state but only grab the ones we're concerned with
 
@@ -395,7 +394,7 @@ module.exports = function(RED) {
 		var credentials = RED.nodes.getCredentials(node_id) || {};
 
 		credentials.app_id = req.query.app_id;
-		credentials.app_secret = req.query.app_secret;				// app_secret not registered as type above, so never gets written to disk
+		credentials.app_secret = req.query.app_secret;
 		credentials.redirect_uri = req.query.redirect_uri;
 
 		if (!credentials.app_id || !credentials.app_secret || ! credentials.redirect_uri) {
@@ -414,18 +413,52 @@ module.exports = function(RED) {
 				redirect_uri: credentials.redirect_uri,
 				response_type: "code",
 				scope: "user_profile,user_media",
-				state: node_id + ":" + credentials.csrfToken
+				state: node_id + ":" + credentials.csrfToken + ":0"		// 0 = first callback; getting short-lived token
 			}
 		});
 
 		res.redirect(url);
-
-		console.log("################");
-		console.log("instagram: requesting access token:\n", url);
-		console.log("################");
-
 		RED.nodes.addCredentials(node_id,credentials);
 	});
+
+	RED.httpAdmin.get("/instagram-credentials/accesstoken", function(req, res) {
+		// var node_id = req.query.node_id;
+		//
+		// var credentials = RED.nodes.getCredentials(node_id) || {};
+		//
+		// credentials.app_id = req.query.app_id;
+		// credentials.app_secret = req.query.app_secret;
+		// credentials.redirect_uri = req.query.redirect_uri;
+		//
+		// if (!credentials.app_id || !credentials.app_secret || ! credentials.redirect_uri) {
+		// 	return res.send(RED._("instagram.error.no-ui-credentials"));
+		// }
+		//
+		// var csrfToken = crypto.randomBytes(18).toString("base64").replace(/\//g, "-").replace(/\+/g, "_");
+		// credentials.csrfToken = csrfToken;										// csrfToken not registered as type above, so never gets written to disk
+		//
+		// var url = Url.format({
+		// 	protocol: "https",
+		// 	hostname: "api.instagram.com",
+		// 	pathname: "/oauth/authorize/",
+		// 	query: {
+		// 		app_id: credentials.app_id,												// Instragram Basic Display API now requires 'app_id' instead of 'cliend_id'
+		// 		redirect_uri: credentials.redirect_uri,
+		// 		response_type: "code",
+		// 		scope: "user_profile,user_media",
+		// 		state: node_id + ":" + credentials.csrfToken + ":0"		// 0 = first callback; getting short-lived token
+		// 	}
+		// });
+		//
+		// res.redirect(url);
+		//
+		// console.log("################");
+		// console.log("instagram: requesting access token:\n", url);
+		// console.log("################");
+		//
+		// RED.nodes.addCredentials(node_id,credentials);
+	});
+
 
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
 		console.log("################ callback from instagram triggered ################");
@@ -433,6 +466,7 @@ module.exports = function(RED) {
 		var state = req.query.state.split(":");
 		var node_id = state[0];
 		var csrfToken = state[1];
+		var callbackState = state[2];
 
 		var credentials = RED.nodes.getCredentials(node_id) || {};
 
@@ -454,45 +488,90 @@ module.exports = function(RED) {
 
 		credentials.code = req.query.code;
 
-		request.post({
-			url: "https://api.instagram.com/oauth/access_token",
-			json: true,
-			form: {
-				app_id: credentials.app_id,
-				app_secret: credentials.app_secret,
-				grant_type: "authorization_code",
-				redirect_uri: credentials.redirect_uri,
-				code: credentials.code
-			},
-		}, function(err, result, data) {
+		if(callbackState===0) {				// received authorization code; to send out to get a short-lived token
 
-			console.log("################");
-			console.log(data);
-			console.log("################");
+			request.post({
+				url: "https://api.instagram.com/oauth/access_token",
+				json: true,
+				form: {
+					app_id: credentials.app_id,
+					app_secret: credentials.app_secret,
+					grant_type: "authorization_code",
+					redirect_uri: credentials.redirect_uri,
+					code: credentials.code
+				},
+			}, function(err, result, data) {
 
-			if (err) {
-				return res.send(RED._("instagram.error.request-error", {err: err}));
-			}
-			if (data.error) {
-				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
-			}
-			if(result.statusCode !== 200) {
-				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
-			}
+				console.log("######data#######");
+				console.log(data);
+				console.log("######/data######");
 
-			if(data.user_id) {
-				credentials.user_id = data.user_id;
-			} else {
-				return res.send(RED._("instagram.error.user_id-fetch-fail"));
-			}
-			if(data.access_token) {
-				credentials.access_token = data.access_token;
-			} else {
-				return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
-			}
+				if (err) {
+					return res.send(RED._("instagram.error.request-error", {err: err}));
+				}
+				if (data.error) {
+					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+				}
+				if(result.statusCode !== 200) {
+					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
+				}
 
-			RED.nodes.addCredentials(node_id, credentials);
-			res.send(RED._("instagram.message.authorized"));
-		});
+				if(data.user_id) {
+					credentials.user_id = data.user_id;
+				} else {
+					return res.send(RED._("instagram.error.user_id-fetch-fail"));
+				}
+				if(data.access_token) {
+					credentials.access_token = data.access_token;
+				} else {
+					return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
+				}
+
+				RED.nodes.addCredentials(node_id, credentials);
+				res.send(RED._("instagram.message.authorized"));
+			});
+		} else if(callbackState===1) {			// requesting long-lived token from short-lived one
+
+			request.get({
+				url: "https://graph.instagram.com/access_token",
+				json: false,
+				form: {
+					grant_type: "ig_exchange_token",
+					client_secret: credentials.app_secret,
+					access_token: credentials.access_token
+				},
+			}, function(err, result, data) {
+
+				console.log("######access_token#######");
+				console.log(data);
+				console.log("######/access_token######");
+
+				if (err) {
+					return res.send(RED._("instagram.error.request-error", {err: err}));
+				}
+				if (data.error) {
+					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+				}
+				if(result.statusCode !== 200) {
+					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
+				}
+
+				if(data.access_token) {
+					credentials.access_token = data.access_token;		// this will now be the long-lived (60-day) access token!
+				} else {
+					return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
+				}
+
+				if(data.expires_in) {
+					credentials.expires_in = Math.floor(Date.now()/1000) + data.expires_in;
+				} else {
+					return res.send(RED._("instagram.error.accesstoken-expiry-fail"));
+				}
+
+				RED.nodes.addCredentials(node_id, credentials);
+				res.send(RED._("instagram.message.authorized"));
+			});
+
+		}
 	});
 };

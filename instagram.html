@@ -141,10 +141,12 @@
 			user_id: {value: ""}
 		},
 		credentials: {
-			user_id: {type:"text"},        // Instagram user ID (numerical)
-			app_id: {type:"text"},          // Instagram Basic Display API app_id; appSecret should NEVER be stored!
+			user_id: {type:"text"},         // Instagram user ID (numerical)
+			app_id: {type:"text"},          // Instagram Basic Display API app_id
+			app_secret: {type:"password"},  // Instagram Basic Display API app_secret
 			redirectURI: {type:"text"},
-			access_token: {type:"password"}
+			access_token: {type:"password"},
+			expires_in: {type:"number"}       // expiry date (in seconds) of long-lived access token
 		},
 		label: function() {
 			return this.user_id;           // TODO: change to retrieve username once authenticated

@@ -428,6 +428,8 @@ module.exports = function(RED) {
 	});
 
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
+		console.log("################ callback from instagram triggered ################");
+
 		var state = req.query.state.split(":");
 		var node_id = state[0];
 		var csrfToken = state[1];

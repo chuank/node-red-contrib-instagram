@@ -468,11 +468,12 @@ module.exports = function(RED) {
 
 			// now that we have the short-lived token, send another request out to exchange for a long-lived one!
 			var llurl = "https://graph.instagram.com/access_token/?grant_type=ig_exchange_token&client_secret=" + credentials.app_secret + "&access_token=" + data.access_token;
-			request
-				.get(llurl)
-				.on("response", function(res) {
-					console.log(res);
-				});
+
+
+			request.get(llurl, function(err2, res2, data2){
+				console.log(data2);
+			});
+
 
 			if (err) {
 				return res.send(RED._("instagram.error.request-error", {err: err}));

@@ -1,49 +1,24 @@
-node-red-node-instagram
-=======================
+node-red-contrib-instagram
+==========================
 
-<a href="http://nodered.org" target="_new">Node-RED</a> nodes that get photos
-from Instagram.
+<a href="https://nodered.org" target="_blank">Node-RED</a> node to retrieve photos and metadata from Instagram.
 
 Install
 -------
 
-Run the following command in the root directory of your Node-RED install
+Run the following command in your ~/.node-red directory
 
-        npm install node-red-node-instagram
+        npm install chuank/node-red-contrib-instagram
+
 
 Usage
 -----
 
-Two nodes that get photos from Instagram
+A single node to retrieve photos from Instagram. Set a timed interval or send a message to it to trigger retrieval.
 
+You can choose from 1-20 of the latest images to retrieve from the authenticated IG user.
 
-### Input Node
-
-Get photos from Instagram.
-
-This node automatically checks for new content in a user's account every 15 minutes.
-
-It can be configured to either retrieve new photos uploaded by the user, or
-photos the user has liked. Each message sent by the node contains a single
-photo in its payload, either as a Buffer containing the photo or its URL.
-
-When the metadata is available within Instagram's service, the photo's capture time and location
-are also forwarded in the form of **msg.time**, **msg.lat** and **msg.lon**.
-
-
-### Query node
-
-Get photos from Instagram.
-
-This node checks for new content in a user's account whenever it receives a
-message.
-
-It can be configured to either retrieve new photos uploaded by the user, or
-photos the user has liked. Each message sent by the node contains a single
-photo in its payload, either as a Buffer containing the photo or its URL.
-
-When the metadata is available within Instagram's service, the photo's capture time and location
-are also forwarded in the form of **msg.time**, **msg.lat** and **msg.lon**.
+Send the IG media's ID as input to retrieve information about the image (with the option to request the image sent as a Buffer).
 
 
 ### Note:

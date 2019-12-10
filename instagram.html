@@ -57,13 +57,6 @@
         <input type="text" id="node-input-instagram">
     </div>
     <div class="form-row">
-        <label for="node-input-inputType"><i class="icon-search"></i> <span data-i18n="instagram.label.type"></span></label>
-        <select type="text" id="node-input-inputType" style="display: inline-block; vertical-align: middle; width:60%;">
-            <option value="photo" data-i18n="instagram.label.userphoto"></option>
-            <option value="like" data-i18n="instagram.label.likedphoto"></option>
-        </select>
-    </div>
-    <div class="form-row">
         <label for="node-input-outputType"><i class="icon-search"></i> <span data-i18n="instagram.label.output"></span></label>
         <select type="text" id="node-input-outputType" style="display: inline-block; vertical-align: middle; width:60%;">
             <option value="buffer" data-i18n="instagram.label.buffer"></option>
@@ -79,55 +72,7 @@
 <script type="text/x-red" data-help-name="instagram">
     <p>Get photos from Instagram.</p>
 
-    <p>This node checks for new content in a user's account whenever it receives a
-    message.</p>
-
-    <p>It can be configured to either retrieve new photos uploaded by the user, or
-    photos the user has liked. Each message sent by the node contains a single
-    photo in its payload, either as a Buffer containing the photo or its URL.</p>
-
-    <p>When the metadata is available within Instagram's service, the photo's capture time and location
-    are also forwarded in the form of msg.time, msg.lat and msg.lon.</p>
-
-    <p>Videos are currently not supported and are ignored.</p>
-</script>
-
-<script type="text/x-red" data-template-name="instagram in">
-    <div class="form-row">
-        <label for="node-input-instagram"><i class="fa fa-user"></i> <span data-i18n="instagram.label.user"></span></label>
-        <input type="text" id="node-input-instagram">
-    </div>
-    <div class="form-row">
-        <label for="node-input-inputType"><i class="icon-search"></i> <span data-i18n="instagram.label.type"></span></label>
-        <select type="text" id="node-input-inputType" style="display: inline-block; vertical-align: middle; width:60%;">
-            <option value="photo" data-i18n="instagram.label.userphoto"></option>
-            <option value="like" data-i18n="instagram.label.likedphoto"></option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-outputType"><i class="icon-search"></i> <span data-i18n="instagram.label.output"></span></label>
-        <select type="text" id="node-input-outputType" style="display: inline-block; vertical-align: middle; width:60%;">
-            <option value="buffer" data-i18n="instagram.label.buffer"></option>
-            <option value="link" data-i18n="instagram.label.url"></option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="instagram.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]instagram.placeholder.name">
-    </div>
-</script>
-
-<script type="text/x-red" data-help-name="instagram in">
-    <p>Get photos from Instagram.</p>
-
-    <p>This node automatically checks for new content in a user's account every 15 minutes.</p>
-
-    <p>It can be configured to either retrieve new photos uploaded by the user, or
-    photos the user has liked. Each message sent by the node contains a single
-    photo in its payload, either as a Buffer containing the photo or its URL.</p>
-
-    <p>When the metadata is available within Instagram's service, the photo's capture time and location
-    are also forwarded in the form of msg.time, msg.lat and msg.lon.</p>
+    <p>More information coming.</p>
 
     <p>Videos are currently not supported and are ignored.</p>
 </script>
@@ -244,39 +189,17 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType("instagram in",{
-    	category: "social",
-    	defaults: {
-    		instagram: { type:"instagram-credentials", required: true },
-    		inputType: { value: "photo"},
-    		outputType: { value:"buffer" },
-    		name: {value:""}
-    	},
-    	color:"#889FB3",
-    	inputs:0,
-    	outputs:1,
-    	icon: "instagram.png",
-    	label: function() {
-    		return this.name||this._("instagram.label.instagram");
-    	},
-    	labelStyle: function() {
-    		return this.name?"node_label_italic":"";
-    	}
-    });
-</script>
-
-<script type="text/javascript">
     RED.nodes.registerType("instagram",{
     	category: "social",
     	defaults: {
     		instagram: { type:"instagram-credentials", required: true },
-    		inputType: { value: "photo"},
-    		outputType: { value:"buffer" },
+    		inputType: { value:"photo"},
+    		outputType: { value:"link" },
     		name: {value:""}
     	},
     	color:"#889FB3",
     	inputs:1,
-    	outputs:1,
+    	outputs:2,
     	icon: "instagram.png",
     	label: function() {
     		return this.name||this._("instagram.label.instagram");

@@ -1,25 +1,24 @@
 {
-    "name"          : "node-red-node-instagram",
-    "version"       : "0.1.1",
-    "description"   : "Node-RED nodes that get photos from Instagram",
+    "name"          : "node-red-contrib-instagram",
+    "version"       : "0.0.1",
+    "description"   : "Node-RED nodes to retrieve photos & metadata from Instagram",
     "dependencies"  : {
-        "request":"~2.74.0",
-        "instagram-node":"~0.5.1"
+        "request":"~2.74.0"
     },
     "repository" : {
         "type":"git",
-        "url":"https://github.com/node-red/node-red-web-nodes/tree/master/instagram"
+        "url":"https://github.com/chuank/node-red-contrib-instagram"
     },
     "license": "Apache-2.0",
     "keywords": [ "node-red", "instagram", "photo" ],
     "node-red"      : {
         "nodes"     : {
-            "instagram": "instagram.js"
+            "instagram" : "instagram.js"
         }
     },
     "author": {
-        "name": "Zoltan Balogh",
-        "email": "zoltan.balogh@uk.ibm.com",
-        "url": "http://nodered.org"
+        "name": "Chuan Khoo",
+        "email": "khoo.chuan@gmail.com",
+        "url": "https://chuank.com"
     }
 }

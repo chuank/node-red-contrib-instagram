@@ -1,4 +1,9 @@
 /**
+ *
+ * Copyright 2019 Chuan Khoo.
+ * www.chuank.com
+ *
+ * Original (but deprecated) source built from node-red-node-instagramuser
  * Copyright 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +20,11 @@
  **/
 module.exports = function(RED) {
 	"use strict";
-	// needed for auth
 	var crypto = require("crypto");
 	var Url = require("url");
 	var request = require("request");
 
 	var IMAGE = "image";// currently we're only considering images
-
 	var repeat = 900000; // 15 minutes => the repeat frequency of the input node
 
 	function InstagramCredentialsNode(n) {
@@ -29,6 +32,7 @@ module.exports = function(RED) {
 
 		var node = this;
 
+		// IG's beta implementation of long-lived tokens (60 days) – credential node will check and refresh automatically after 60 days
 		refreshLongLivedAccessToken(node);
 
 		node.interval = setInterval(function() {
@@ -88,7 +92,7 @@ module.exports = function(RED) {
 			return;
 		}
 
-		node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
+		// node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
 
 		node.on("input", function(msg) {
 			handleQueryNodeInput(node, msg);
@@ -107,38 +111,51 @@ module.exports = function(RED) {
 			return;
 		}
 
-		node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
+		// no longer using instagram_node; deprecated calls in that node make it unusable! rolling our own here on out...
 
-		console.log("##############");
-		console.log(node.instagramConfig.credentials.access_token);
-		console.log("##############");
+		// curl -X GET 'https://graph.instagram.com/17841400980850763/media/?fields=media_type,media_url,caption,timestamp&access_token=IGQVJWZAURmbHhxdHF6WjJKOVVSNktnSEVrdjlOalFzT3ZAVVXVrbjVTSFpnQUVnVHZATbU5jeTR0MWt3MENrZAWgwNmt0VUwzTWVrT2hnSXpHMDVWWWc3TVFRbThnNjRnS01qYkdTNTJn'
+		var mediaUrl = "https://graph.instagram.com/" + node.credentials.user_id + "/media/?access_token=" + node.credentials.access_token;
+		mediaUrl += "&field=media_type,media_url,caption,timestamp";
+
+		request.get(mediaUrl, function(err, res, data){
+			if (err) {
+				return res.send(RED._("instagram.error.request-error", {err: err}));
+			}
+			if (data.error) {
+				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+			}
+			if(res.statusCode !== 200) {
+				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+			}
+
+			var pData2 = JSON.parse(data);
+			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
+			console.log(pData2);
+			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
+		});
+
 
 		// Now grab initial state but only grab the ones we're concerned with
+		// if (node.inputType === "photo") {
+		// 	node.ig.user_media_recent("me", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
+		// 		if (err) {
+		// 			node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
+		// 		}
 
-		if (node.inputType === "photo") {
-			node.ig.user_media_recent("self", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
-				if (err) {
-					node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
-				}
+		// if(medias.length > 0) { // if the user has uploaded something to Instagram already
+		// 	node.latestSelfContentID = medias[0].id;
+		// }
+		//
+		// node.on("input", function(msg) {
+		// 	msg = {};
+		// 	handleInputNodeInput(node, msg);
+		// });
+		// node.interval = setInterval(function() { // self trigger
+		// 	node.emit("input", {});
+		// }, repeat);
+		// });
 
-				console.log("##############");
-				console.log(medias);
-				console.log("##############");
-
-			// if(medias.length > 0) { // if the user has uploaded something to Instagram already
-			// 	node.latestSelfContentID = medias[0].id;
-			// }
-			//
-			// node.on("input", function(msg) {
-			// 	msg = {};
-			// 	handleInputNodeInput(node, msg);
-			// });
-			// node.interval = setInterval(function() { // self trigger
-			// 	node.emit("input", {});
-			// }, repeat);
-			});
-
-		} else if (node.inputType === "like") {
+		// } else if (node.inputType === "like") {
 		// 	node.ig.user_self_liked({ count : 1, max_like_id : null}, function(err, medias, pagination, remaining, limit) {
 		// 		if (err) {
 		// 			node.warn(RED._("instagram.warn.likedphoto-fetch-fail", {err: err}));
@@ -157,7 +174,7 @@ module.exports = function(RED) {
 		// 			node.emit("input", {});
 		// 		}, repeat);
 		// 	});
-		}
+		// }
 	}
 
 	function handleQueryNodeInput(node, msg) {
@@ -351,40 +368,6 @@ module.exports = function(RED) {
 		}
 	}
 
-	function InstagramInNode(n) {
-		RED.nodes.createNode(this,n);
-
-		var node = this;
-
-		node.ig = require("instagram-node").instagram();
-
-		node.latestSelfContentID = null; // if the user has not liked/uploaded any content yet
-		node.latestLikedID = null;
-
-		node.inputType = n.inputType;
-		node.outputType = n.outputType;
-
-		node.interval = null; // used to track individual refresh intervals
-
-		node.instagramConfig = RED.nodes.getNode(n.instagram);
-		if (!node.instagramConfig) {
-			node.warn(RED._("instagram.warn.missing-credentials"));
-			return;
-		}
-
-		initializeInputNode(node); // the build in poll interval is getting set up at the end of init
-
-		node.on("close", function() {
-			if (node.interval !== null) {
-				clearInterval(node.interval);
-			}
-			node.latestSelfContentID = null;
-			node.latestLikedID = null;
-			node.inputType = null;
-			node.outputType = null;
-		});
-	}
-
 	function InstagramNode(n) {
 		RED.nodes.createNode(this,n);
 
@@ -421,8 +404,6 @@ module.exports = function(RED) {
 	});
 
 	RED.nodes.registerType("instagram",InstagramNode);
-
-	RED.nodes.registerType("instagram in",InstagramInNode);
 
 	RED.httpAdmin.get("/instagram-credentials/auth", function(req, res) {
 		var node_id = req.query.node_id;

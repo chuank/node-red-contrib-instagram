@@ -4,8 +4,6 @@
             "instagram": "Instagram",
             "user": "User",
             "type": "Type",
-            "userphoto": "User photos",
-            "likedphoto": "Liked photos",
             "output": "Output",
             "buffer": "the photo as a buffer",
             "url": "the photo url",

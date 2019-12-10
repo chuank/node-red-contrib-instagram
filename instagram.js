@@ -26,6 +26,23 @@ module.exports = function(RED) {
 
 	function InstagramCredentialsNode(n) {
 		RED.nodes.createNode(this,n);
+
+		var node = this;
+
+		node.instagramConfig = RED.nodes.getNode(n.instagram);
+		var at = node.instagramConfig.credentials.access_token;
+		console.log("InstagramCredentialsNode initialisation", at);
+
+
+		// node.interval = setInterval(function() { // self trigger
+		// 	node.emit("input", {});
+		// }, repeat);
+
+		// if (node.instagramConfigNodeIntervalId) {
+		// 	window.clearTimeout(window.instagramConfigNodeIntervalId);
+		// 	delete window.instagramConfigNodeIntervalId;
+		// }
+		// node.interval = null; // used to track individual refresh intervals
 	}
 
 	function downloadImageAndSendAsBuffer(node, url, msg) {
@@ -379,8 +396,10 @@ module.exports = function(RED) {
 		credentials: {
 			user_id: {type:"text"},
 			app_id: {type:"text"},
+			app_secret: {type:"password"},
 			redirect_uri: { type:"text"},
-			access_token: {type: "password"}
+			access_token: {type: "password"},
+			expires_in: {type:"number"}	       // expiry date (in seconds) of long-lived access token
 		}
 	});
 
@@ -500,10 +519,12 @@ module.exports = function(RED) {
 
 					credentials.access_token = data2.access_token;
 					credentials.expires_in = Math.floor(Date.now()/1000) + data2.expires_in;
-				});
 
-				RED.nodes.addCredentials(node_id, credentials);
-				res.send(RED._("instagram.message.authorized"));
+					console.log(credentials);
+
+					RED.nodes.addCredentials(node_id, credentials);
+					res.send(RED._("instagram.message.authorized"));
+				});
 			}
 		});
 	});

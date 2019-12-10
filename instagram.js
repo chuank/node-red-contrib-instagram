@@ -107,26 +107,23 @@ module.exports = function(RED) {
 			return;
 		}
 
-		// access tokens are short-lived without app approval, therefore
-		// credentials need to store a time value to check each hour and force
-		// a new token request when appropriate
 		node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
 
-		// console.log("##############");
-		// console.log(node.instagramConfig.credentials.access_token);
-		// console.log("##############");
+		console.log("##############");
+		console.log(node.instagramConfig.credentials.access_token);
+		console.log("##############");
 
 		// Now grab initial state but only grab the ones we're concerned with
 
 		if (node.inputType === "photo") {
-			// node.ig.user_media_recent("self", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
-			// 	if (err) {
-			// 		node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
-			// 	}
-			//
-			// 	console.log("##############");
-			// 	console.log(medias);
-			// 	console.log("##############");
+			node.ig.user_media_recent("self", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
+				if (err) {
+					node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
+				}
+
+				console.log("##############");
+				console.log(medias);
+				console.log("##############");
 
 			// if(medias.length > 0) { // if the user has uploaded something to Instagram already
 			// 	node.latestSelfContentID = medias[0].id;
@@ -139,7 +136,8 @@ module.exports = function(RED) {
 			// node.interval = setInterval(function() { // self trigger
 			// 	node.emit("input", {});
 			// }, repeat);
-			// });
+			});
+
 		} else if (node.inputType === "like") {
 		// 	node.ig.user_self_liked({ count : 1, max_like_id : null}, function(err, medias, pagination, remaining, limit) {
 		// 		if (err) {

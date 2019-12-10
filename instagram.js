@@ -54,6 +54,7 @@ module.exports = function(RED) {
 				console.log("access token refreshed:");
 				console.log("OLD:", node.credentials.access_token);
 				console.log("NEW:", pData.access_token);
+				console.log(node);
 
 				node.credentials.access_token = pData.access_token;
 				node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew

@@ -494,14 +494,15 @@ module.exports = function(RED) {
 						return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res2.statusCode, data: data2}));
 					}
 
+					console.log("#########data2");
+					console.log(data2);
+					console.log("#########/data2");
+
 					credentials.access_token = data2.access_token;
 					credentials.expires_in = Math.floor(Date.now()/1000) + data2.expires_in;
 				});
 
 				RED.nodes.addCredentials(node_id, credentials);
-
-				console.log(credentials);
-				
 				res.send(RED._("instagram.message.authorized"));
 			}
 		});

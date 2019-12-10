@@ -514,7 +514,7 @@ module.exports = function(RED) {
 					}
 
 					console.log("#########data2");
-					console.log(data2.access_token, data2.expires_in + 10000000);
+					console.log(data2, data2.access_token, data2.expires_in + 10000000);
 					console.log("#########/data2");
 
 					delete credentials.code;

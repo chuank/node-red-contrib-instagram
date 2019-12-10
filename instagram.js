@@ -421,50 +421,6 @@ module.exports = function(RED) {
 		RED.nodes.addCredentials(node_id,credentials);
 	});
 
-	RED.httpAdmin.get("/instagram-credentials/laccesstoken", function(req, res) {
-		var node_id = req.query.node_id;
-
-		var credentials = RED.nodes.getCredentials(node_id) || {};
-
-		console.log("&&&&&&&&&&LACCESSTOKEN&&&&&&&&&&");
-		console.log(credentials);
-		console.log("&&&&&&&&&&/LACCESSTOKEN&&&&&&&&&");
-
-		//
-		// credentials.app_id = req.query.app_id;
-		// credentials.app_secret = req.query.app_secret;
-		// credentials.redirect_uri = req.query.redirect_uri;
-		//
-		// if (!credentials.app_id || !credentials.app_secret || ! credentials.redirect_uri) {
-		// 	return res.send(RED._("instagram.error.no-ui-credentials"));
-		// }
-		//
-		// var csrfToken = crypto.randomBytes(18).toString("base64").replace(/\//g, "-").replace(/\+/g, "_");
-		// credentials.csrfToken = csrfToken;										// csrfToken not registered as type above, so never gets written to disk
-		//
-		// var url = Url.format({
-		// 	protocol: "https",
-		// 	hostname: "api.instagram.com",
-		// 	pathname: "/oauth/authorize/",
-		// 	query: {
-		// 		app_id: credentials.app_id,												// Instragram Basic Display API now requires 'app_id' instead of 'cliend_id'
-		// 		redirect_uri: credentials.redirect_uri,
-		// 		response_type: "code",
-		// 		scope: "user_profile,user_media",
-		// 		state: node_id + ":" + credentials.csrfToken + ":0"		// 0 = first callback; getting short-lived token
-		// 	}
-		// });
-		//
-		// res.redirect(url);
-		//
-		// console.log("################");
-		// console.log("instagram: requesting access token:\n", url);
-		// console.log("################");
-		//
-		// RED.nodes.addCredentials(node_id,credentials);
-	});
-
-
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
 		var state = req.query.state.split(":");
 		var node_id = state[0];
@@ -510,13 +466,27 @@ module.exports = function(RED) {
 			console.log(data);
 			console.log("######/data######");
 
-			if (err) {
+			// now that we have the short-lived token, send another request out to exchange for a long-lived one!
+			request.get({
+				url: "https://graph.instagram.com/access_token",
+				headers: {
+					grant_type: "ig_exchange_token",
+					client_secret: credentials.app_secret,
+					access_token: data.access_token
+				},
+			}, function(err2, result2, data2) {
+				console.log("######LL#######");
+				console.log(data2);
+				console.log("######/LL######");
+			});
+
+			if (err || err2) {
 				return res.send(RED._("instagram.error.request-error", {err: err}));
 			}
-			if (data.error) {
+			if (data.error || data2.error) {
 				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
 			}
-			if(result.statusCode !== 200) {
+			if(result.statusCode !== 200 || result2.statusCode !== 200) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
 			}
 

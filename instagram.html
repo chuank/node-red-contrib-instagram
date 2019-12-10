@@ -182,12 +182,6 @@
 						$("#node-config-dialog-ok").button("enable");
 						updateInstagramScreenName(data.user_id);
 						delete window.instagramConfigNodeIntervalId;
-
-						// send out for a long-lived access token
-						var query = "node_id=" + id;
-						var url = "instagram-credentials/laccesstoken/?" + query;
-						$(this).attr("href",url);
-
 					} else {
 						window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials,2000);
 					}

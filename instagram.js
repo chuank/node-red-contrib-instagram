@@ -29,9 +29,10 @@ module.exports = function(RED) {
 
 		var node = this;
 
-		node.instagramConfig = RED.nodes.getNode(n.instagram);
-		var at = node.instagramConfig.credentials.access_token;
-		console.log("InstagramCredentialsNode initialisation", at);
+		// node.instagramConfig = RED.nodes.getNode(n.instagram);
+		// var at = node.instagramConfig.credentials.access_token;
+		var a = node.credentials.access_token;
+		console.log("InstagramCredentialsNode initialisation", a);
 
 
 		// node.interval = setInterval(function() { // self trigger
@@ -514,15 +515,10 @@ module.exports = function(RED) {
 					}
 
 					var pData2 = JSON.parse(data2);
-					console.log("#########data2");
-					console.log(pData2, pData2.access_token, pData2.expires_in + 10000000);
-					console.log("#########/data2");
 
 					delete credentials.code;
 					credentials.access_token = pData2.access_token;
 					credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in;
-
-					console.log(credentials);
 
 					RED.nodes.addCredentials(node_id, credentials);
 					res.send(RED._("instagram.message.authorized"));

@@ -513,7 +513,7 @@ module.exports = function(RED) {
 						return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res2.statusCode, data: data2}));
 					}
 
-					pData2 = JSON.parse(data2);
+					var pData2 = JSON.parse(data2);
 					console.log("#########data2");
 					console.log(pData2, pData2.access_token, pData2.expires_in + 10000000);
 					console.log("#########/data2");

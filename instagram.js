@@ -29,48 +29,40 @@ module.exports = function(RED) {
 
 		var node = this;
 
-		var now = Math.floor(Date.now()/1000);
-		if(node.credentials.expires_in-now <= 0) {
-			refreshLongLivedAccessToken(node);
-		}
+		refreshLongLivedAccessToken(node);
 
 		node.interval = setInterval(function() {
-			console.log("check token expiry");
-		}, 5000);
-
-		// if (node.instagramConfigNodeIntervalId) {
-		// 	window.clearTimeout(window.instagramConfigNodeIntervalId);
-		// 	delete window.instagramConfigNodeIntervalId;
-		// }
-		// node.interval = null; // used to track individual refresh intervals
+			refreshLongLivedAccessToken(node);
+		}, 900*1000);													// check every 15 minutes
 	}
 
 	function refreshLongLivedAccessToken(node) {
+		var now = Math.floor(Date.now()/1000);
+		if(node.credentials.expires_in-now <= 0) {
 		// now that we have the short-lived token, send another request out to exchange for a long-lived one!
-		var refreshUrl = "https://graph.instagram.com/refresh_access_token/" +
+			var refreshUrl = "https://graph.instagram.com/refresh_access_token/" +
 							"?grant_type=ig_refresh_token" +
 							"&access_token=" + node.credentials.access_token;
 
-		request.get(refreshUrl, function(err, res, data){
-			if (err) {
-				return res.send(RED._("instagram.error.request-error", {err: err}));
-			}
-			if (data.error) {
-				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
-			}
-			if(res.statusCode !== 200) {
-				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
-			}
+			request.get(refreshUrl, function(err, res, data){
+				if (err) {
+					return res.send(RED._("instagram.error.request-error", {err: err}));
+				}
+				if (data.error) {
+					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+				}
+				if(res.statusCode !== 200) {
+					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+				}
 
-			var pData = JSON.parse(data);
-			node.credentials.access_token = pData.access_token;
-			node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
+				var pData = JSON.parse(data);
+				node.credentials.access_token = pData.access_token;
+				node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
 
-			RED.nodes.addCredentials(node.id, node.credentials);
-		});
+				RED.nodes.addCredentials(node.id, node.credentials);
+			});
+		}
 	}
-
-
 
 	function downloadImageAndSendAsBuffer(node, url, msg) {
 		request({ uri : url, encoding : null}, function (error, response, body) {

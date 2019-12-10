@@ -489,7 +489,7 @@ module.exports = function(RED) {
 
 		credentials.code = req.query.code;
 
-		if(callbackState==="0#_") {				// received authorization code; to send out to get a short-lived token
+		if(callbackState==="0") {				// received authorization code; to send out to get a short-lived token
 
 			request.post({
 				url: "https://api.instagram.com/oauth/access_token",
@@ -531,7 +531,7 @@ module.exports = function(RED) {
 				RED.nodes.addCredentials(node_id, credentials);
 				res.send(RED._("instagram.message.authorized"));
 			});
-		} else if(callbackState==="1#_") {			// requesting long-lived token from short-lived one
+		} else if(callbackState==="1") {			// requesting long-lived token from short-lived one
 
 			request.get({
 				url: "https://graph.instagram.com/access_token",

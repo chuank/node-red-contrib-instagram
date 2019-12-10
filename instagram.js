@@ -467,29 +467,12 @@ module.exports = function(RED) {
 			console.log("######/data######");
 
 			// now that we have the short-lived token, send another request out to exchange for a long-lived one!
-			request.get({
-				url: "https://graph.instagram.com/access_token",
-				headers: {
-					grant_type: "ig_exchange_token",
-					client_secret: credentials.app_secret,
-					access_token: data.access_token
-				},
-			}, function(err2, result2, data2) {
-
-				if (err2) {
-					return res.send(RED._("instagram.error.request-error", {err: err2}));
-				}
-				if (data2.error) {
-					return res.send(RED._("instagram.error.oauth-error", {error: data2.error}));
-				}
-				if(result2.statusCode !== 200) {
-					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result2.statusCode, data: data2}));
-				}
-
-				console.log("######LL#######");
-				console.log(data2);
-				console.log("######/LL######");
-			});
+			var llurl = "https://graph.instagram.com/access_token/?grant_type=ig_exchange_token&client_secret=" + credentials.app_secret + "&access_token=" + data.access_token;
+			request
+				.get(llurl)
+				.on("response", function(res) {
+					console.log(res);
+				});
 
 			if (err) {
 				return res.send(RED._("instagram.error.request-error", {err: err}));

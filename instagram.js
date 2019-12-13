@@ -117,6 +117,8 @@ module.exports = function(RED) {
 		var mediaUrl = "https://graph.instagram.com/" + node.credentials.user_id + "/media/?access_token=" + node.credentials.access_token;
 		mediaUrl += "&field=media_type,media_url,caption,timestamp";
 
+		console.log(mediaUrl);
+
 		request.get(mediaUrl, function(err, res, data){
 			if (err) {
 				return res.send(RED._("instagram.error.request-error", {err: err}));
@@ -463,7 +465,7 @@ module.exports = function(RED) {
 
 		credentials.code = req.query.code;
 
-		// ready to send out for a short-lived access token (1hr)
+		// ready to send out for a short-lived access token (valid for 1hr)
 		request.post({
 			url: "https://api.instagram.com/oauth/access_token",
 			json: true,

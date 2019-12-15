@@ -127,8 +127,6 @@
 
 			function pollInstagramCredentials() {
 				$.getJSON("credentials/instagram-credentials/"+node_id,function(data) {
-					console.log(data);
-
 					if (data.user_id) {    // means authentication has been successful
 						$("#node-config-dialog-ok").button("enable");
 						updateInstagramScreenName(data.username);

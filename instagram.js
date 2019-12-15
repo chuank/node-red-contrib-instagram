@@ -468,12 +468,6 @@ module.exports = function(RED) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
 			}
 
-			if(data.user_id) {
-				// NOTE: this user_id might be offset by +/- 1 (thanks FB?!?); a subsequent call to /me will rectify this
-				credentials.user_id = data.user_id;
-			} else {
-				return res.send(RED._("instagram.error.user_id-fetch-fail"));
-			}
 			if(!data.access_token) {
 				return res.send(RED._("instagram.error.accesstoken-fetch-fail"));
 			} else {
@@ -497,6 +491,7 @@ module.exports = function(RED) {
 					var pData2 = JSON.parse(data2);
 
 					// NOTE: previous user_id might be offset by +/- 1 (thanks FB?!?); a call to /me retrieves the correct value
+					// also take this opportunity to grab the username text
 					var userUrl = "https://graph.instagram.com/me/?access_token=" + data.access_token;
 					userUrl += "&fields=username";
 
@@ -512,11 +507,24 @@ module.exports = function(RED) {
 						}
 
 						var pData3 = JSON.parse(data3);
+						console.log(pData3);
 
+
+						if(pData3.id) {
+							// NOTE: this user_id might be offset by +/- 1 (thanks FB?!?); a subsequent call to /me will rectify this
+							credentials.user_id = pData3.id;
+						} else {
+							return res.send(RED._("instagram.error.user_id-fetch-fail"));
+						}
+
+						if(pData3.username) {
+							// NOTE: this user_id might be offset by +/- 1 (thanks FB?!?); a subsequent call to /me will rectify this
+							credentials.username = pData3.username;
+						} else {
+							return res.send(RED._("instagram.error.username-fetch-fail"));
+						}
 						// now we have all of the correct data, set it into credentials
 						delete credentials.code;
-						credentials.username = pData3.username;
-						credentials.user_id = pData3.id;
 						credentials.access_token = pData2.access_token;
 						credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
 

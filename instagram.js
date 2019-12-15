@@ -115,7 +115,7 @@ module.exports = function(RED) {
 		// 	console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
 		// 	console.log(pData2);
 		// 	console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
-		});
+		// });
 
 
 		// Now grab initial state but only grab the ones we're concerned with

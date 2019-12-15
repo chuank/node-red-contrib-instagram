@@ -98,7 +98,7 @@ module.exports = function(RED) {
 		mediaUrl += "?fields=media_type,media_url,caption,timestamp";
 		mediaUrl += "&access_token=" + node.instagramConfig.credentials.access_token;
 
-		console.log(mediaUrl);
+		console.log(node.instagramConfig.credentials);
 
 		// request.get(mediaUrl, function(err, res, data){
 		// 	if (err) {
@@ -522,8 +522,6 @@ module.exports = function(RED) {
 						delete credentials.code;
 						credentials.access_token = pData2.access_token;
 						credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
-
-						console.log(credentials);
 
 						RED.nodes.addCredentials(node_id, credentials);
 						res.send(RED._("instagram.message.authorized"));

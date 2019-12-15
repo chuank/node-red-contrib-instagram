@@ -507,18 +507,13 @@ module.exports = function(RED) {
 						}
 
 						var pData3 = JSON.parse(data3);
-						console.log(pData3);
-
 
 						if(pData3.id) {
-							// NOTE: this user_id might be offset by +/- 1 (thanks FB?!?); a subsequent call to /me will rectify this
 							credentials.user_id = pData3.id;
 						} else {
 							return res.send(RED._("instagram.error.user_id-fetch-fail"));
 						}
-
 						if(pData3.username) {
-							// NOTE: this user_id might be offset by +/- 1 (thanks FB?!?); a subsequent call to /me will rectify this
 							credentials.username = pData3.username;
 						} else {
 							return res.send(RED._("instagram.error.username-fetch-fail"));
@@ -527,6 +522,8 @@ module.exports = function(RED) {
 						delete credentials.code;
 						credentials.access_token = pData2.access_token;
 						credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
+
+						console.log(credentials);
 
 						RED.nodes.addCredentials(node_id, credentials);
 						res.send(RED._("instagram.message.authorized"));

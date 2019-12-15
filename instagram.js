@@ -80,27 +80,8 @@ module.exports = function(RED) {
 	}
 
 
-	// the query node doesn't require special initialization as it serves the latest photo anyway
-	function initializeNode(node) {
-		if(node.instagramConfig && node.instagramConfig.credentials) {
-			if(!node.instagramConfig.credentials.access_token) {
-				node.warn(RED._("instagram.warn.missing-accesstoken"));
-				return;
-			}
-		} else {
-			node.warn(RED._("instagram.warn.missing-configuration"));
-			return;
-		}
-
-		// node.ig.use({ access_token: node.instagramConfig.credentials.access_token});
-
-		node.on("input", function(msg) {
-			handleQueryNodeInput(node, msg);
-		});
-	}
-
 	// we initialize the node: load access token, obtain current state from Instagram
-	function initializeInputNode(node) {
+	function initializeNode(node) {
 		if(node.instagramConfig && node.instagramConfig.credentials) {
 			if(!node.instagramConfig.credentials.access_token) {
 				node.warn(RED._("instagram.warn.missing-accesstoken"));
@@ -368,7 +349,7 @@ module.exports = function(RED) {
 		}
 	}
 
-	function InstagramNode(n) {
+	function InstagramFeedNode(n) {
 		RED.nodes.createNode(this,n);
 
 		var node = this;
@@ -402,7 +383,7 @@ module.exports = function(RED) {
 		}
 	});
 
-	RED.nodes.registerType("instagramfeed", InstagramNode);
+	RED.nodes.registerType("instagramfeed", InstagramFeedNode);
 
 	RED.httpAdmin.get("/instagramfeed-credentials/auth", function(req, res) {
 		var node_id = req.query.node_id;

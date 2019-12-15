@@ -85,7 +85,8 @@
 	RED.nodes.registerType("instagram-credentials",{
 		category: "config",
 		defaults: {
-			user_id: {value: ""}
+			user_id: {value: ""},
+			username: {value: ""}
 		},
 		credentials: {
 			user_id: {type:"text"},         // Instagram user ID (numerical)
@@ -126,6 +127,8 @@
 
 			function pollInstagramCredentials() {
 				$.getJSON("credentials/instagram-credentials/"+node_id,function(data) {
+					console.log(data);
+
 					if (data.user_id) {    // means authentication has been successful
 						$("#node-config-dialog-ok").button("enable");
 						updateInstagramScreenName(data.username);

@@ -160,7 +160,7 @@
 				var redirectURI = $("#node-config-input-redirectURI").val();
 
 				var query = "node_id=" + id + "&app_id=" + appID + "&app_secret=" + appSecret + "&redirect_uri=" + redirectURI;
-				var url = " instagram-credentials/auth/?" + query;
+				var url = "instagram-credentials/auth/?" + query;
 				$(this).attr("href",url);
 				window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials, 2000);
 			});

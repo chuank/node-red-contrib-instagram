@@ -499,23 +499,51 @@ module.exports = function(RED) {
 
 				request.get(llurl, function(err2, res2, data2){
 					if (err2) {
-						return res.send(RED._("instagram.error.request-error", {err: err2}));
+						return res2.send(RED._("instagram.error.request-error", {err: err2}));
 					}
 					if (data2.error) {
-						return res.send(RED._("instagram.error.oauth-error", {error: data2.error}));
+						return res2.send(RED._("instagram.error.oauth-error", {error: data2.error}));
 					}
 					if(res2.statusCode !== 200) {
-						return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res2.statusCode, data: data2}));
+						return res2.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res2.statusCode, data: data2}));
 					}
 
 					var pData2 = JSON.parse(data2);
 
-					delete credentials.code;
-					credentials.access_token = pData2.access_token;
-					credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
 
-					RED.nodes.addCredentials(node_id, credentials);
-					res.send(RED._("instagram.message.authorized"));
+					// now that we have the short-lived token, send another request out to exchange for a long-lived one!
+					var userUrl = "https://graph.instagram.com/me/?access_token=" + data.access_token;
+
+					request.get(userUrl, function(err3, res3, data3){
+						if (err3) {
+							return res3.send(RED._("instagram.error.request-error", {err: err3}));
+						}
+						if (data3.error) {
+							return res3.send(RED._("instagram.error.oauth-error", {error: data3.error}));
+						}
+						if(res3.statusCode !== 200) {
+							return res3.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res3.statusCode, data: data3}));
+						}
+
+						var pData3 = JSON.parse(data3);
+						console.log(pData3);
+
+						// now we have all of the correct data, set it into credentials
+						delete credentials.code;
+						credentials.user_id = pData3.user_id;
+						credentials.access_token = pData2.access_token;
+						credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
+
+						RED.nodes.addCredentials(node_id, credentials);
+						res.send(RED._("instagram.message.authorized"));
+					});
+
+					// delete credentials.code;
+					// credentials.access_token = pData2.access_token;
+					// credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
+					//
+					// RED.nodes.addCredentials(node_id, credentials);
+					// res.send(RED._("instagram.message.authorized"));
 				});
 			}
 		});

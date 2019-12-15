@@ -15,7 +15,7 @@
 -->
 
 
-<script type="text/x-red" data-template-name="instagram-credentials">
+<script type="text/x-red" data-template-name="instagramfeed-credentials">
     <div id="node-config-instagram-app-keys">
         <div class="form-row">
             <p style="margin-top: 10px;"><b>1.</b> <span data-i18n="instagram.label.create"></span> <a href="https://developers.facebook.com/docs/instagram-basic-display-api/getting-started" target="_blank" style="text-decoration:underline;">developers.facebook.com</a></p>
@@ -51,10 +51,10 @@
     </div>
 </script>
 
-<script type="text/x-red" data-template-name="instagram">
+<script type="text/x-red" data-template-name="instagramfeed">
     <div class="form-row">
-        <label for="node-input-instagram"><i class="fa fa-user"></i> <span data-i18n="instagram.label.user"></span></label>
-        <input type="text" id="node-input-instagram">
+        <label for="node-input-instagramfeed"><i class="fa fa-user"></i> <span data-i18n="instagram.label.user"></span></label>
+        <input type="text" id="node-input-instagramfeed">
     </div>
     <div class="form-row">
         <label for="node-input-outputType"><i class="icon-search"></i> <span data-i18n="instagram.label.output"></span></label>
@@ -64,23 +64,25 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-interval"><i class="fa fa-repeat"></i> <span data-i18n="instagram.label.pollinterval"></span></label>
+        <input type="text" id="node-input-interval" style="width:10%;">
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="instagram.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]instagram.placeholder.name">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="instagram">
+<script type="text/x-red" data-help-name="instagramfeed">
     <p>Get photos from Instagram.</p>
-
     <p>More information coming.</p>
-
     <p>Videos are currently not supported and are ignored.</p>
 </script>
 
 <script type="text/javascript">
 (function() {
 
-	RED.nodes.registerType("instagram-credentials",{
+	RED.nodes.registerType("instagramfeed-credentials",{
 		category: "config",
 		defaults: {
 			user_id: {value: ""}
@@ -103,7 +105,7 @@
 			if (pathname.slice(-1) != "/") {
 				pathname += "/";
 			}
-			var constructedURI = location.protocol + "//" + location.hostname + (location.port ? ":"+location.port : "") + pathname + "instagram-credentials/auth/callback";
+			var constructedURI = location.protocol + "//" + location.hostname + (location.port ? ":"+location.port : "") + pathname + "instagramfeed-credentials/auth/callback";
 			var tip = this._("instagram.tip.redirect", {constructedURI: constructedURI});
 
 			function updateInstagramAuthButton() {
@@ -158,7 +160,7 @@
 				var redirectURI = $("#node-config-input-redirectURI").val();
 
 				var query = "node_id=" + id + "&app_id=" + appID + "&app_secret=" + appSecret + "&redirect_uri=" + redirectURI;
-				var url = "instagram-credentials/auth/?" + query;
+				var url = "instagramfeed-credentials/auth/?" + query;
 				$(this).attr("href",url);
 				window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials, 2000);
 			});
@@ -189,12 +191,13 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType("instagram",{
+    RED.nodes.registerType("instagramfeed",{
     	category: "social",
     	defaults: {
-    		instagram: { type:"instagram-credentials", required: true },
+    		instagram: { type:"instagramfeed-credentials", required: true },
     		inputType: { value:"photo"},
     		outputType: { value:"link" },
+    		interval: { value:60 },
     		name: {value:""}
     	},
     	color:"#889FB3",

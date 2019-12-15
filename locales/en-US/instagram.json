@@ -14,7 +14,8 @@
             "appsecret": "Instagram App Secret",
             "redirecturi": "Redirect URI",
             "authenticate": "Authenticate with Instagram",
-            "instagramuser": "Instagram User"
+            "instagramuser": "Instagram User",
+            "pollinterval": "Poll interval (seconds)"
         },
         "placeholder": {
             "name": "Name"

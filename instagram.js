@@ -3,7 +3,7 @@
  * Copyright 2019 Chuan Khoo.
  * www.chuank.com
  *
- * Original (but deprecated) source built from node-red-node-instagramuser
+ * Original (but deprecated) source built from node-red-node-instagram
  * Copyright 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,7 +81,7 @@ module.exports = function(RED) {
 
 
 	// the query node doesn't require special initialization as it serves the latest photo anyway
-	function initializeQueryNode(node) {
+	function initializeNode(node) {
 		if(node.instagramConfig && node.instagramConfig.credentials) {
 			if(!node.instagramConfig.credentials.access_token) {
 				node.warn(RED._("instagram.warn.missing-accesstoken"));
@@ -116,8 +116,6 @@ module.exports = function(RED) {
 		// curl -X GET 'https://graph.instagram.com/17841400980850763/media/?fields=media_type,media_url,caption,timestamp&access_token=IGQVJWZAURmbHhxdHF6WjJKOVVSNktnSEVrdjlOalFzT3ZAVVXVrbjVTSFpnQUVnVHZATbU5jeTR0MWt3MENrZAWgwNmt0VUwzTWVrT2hnSXpHMDVWWWc3TVFRbThnNjRnS01qYkdTNTJn'
 		var mediaUrl = "https://graph.instagram.com/" + node.credentials.user_id + "/media/?access_token=" + node.credentials.access_token;
 		mediaUrl += "&field=media_type,media_url,caption,timestamp";
-
-		console.log(mediaUrl);
 
 		request.get(mediaUrl, function(err, res, data){
 			if (err) {
@@ -375,8 +373,7 @@ module.exports = function(RED) {
 
 		var node = this;
 
-		node.ig = require("instagram-node").instagram();
-
+		// node.ig = require("instagram-node").instagram();
 		node.inputType = n.inputType;
 		node.outputType = n.outputType;
 
@@ -386,7 +383,7 @@ module.exports = function(RED) {
 			return;
 		}
 
-		initializeQueryNode(node);
+		initializeNode(node);
 
 		node.on("close", function() {
 			node.inputType = null;
@@ -394,7 +391,7 @@ module.exports = function(RED) {
 		});
 	}
 
-	RED.nodes.registerType("instagram-credentials",InstagramCredentialsNode, {
+	RED.nodes.registerType("instagramfeed-credentials", InstagramCredentialsNode, {
 		credentials: {
 			user_id: {type:"text"},
 			app_id: {type:"text"},
@@ -405,9 +402,9 @@ module.exports = function(RED) {
 		}
 	});
 
-	RED.nodes.registerType("instagram",InstagramNode);
+	RED.nodes.registerType("instagramfeed", InstagramNode);
 
-	RED.httpAdmin.get("/instagram-credentials/auth", function(req, res) {
+	RED.httpAdmin.get("/instagramfeed-credentials/auth", function(req, res) {
 		var node_id = req.query.node_id;
 
 		var credentials = RED.nodes.getCredentials(node_id) || {};
@@ -428,7 +425,7 @@ module.exports = function(RED) {
 			hostname: "api.instagram.com",
 			pathname: "/oauth/authorize/",
 			query: {
-				app_id: credentials.app_id,												// Instragram Basic Display API now requires 'app_id' instead of 'cliend_id'
+				app_id: credentials.app_id,												// Instagram Basic Display API now requires 'app_id' instead of 'cliend_id'
 				redirect_uri: credentials.redirect_uri,
 				response_type: "code",
 				scope: "user_profile,user_media",
@@ -440,7 +437,7 @@ module.exports = function(RED) {
 		RED.nodes.addCredentials(node_id,credentials);
 	});
 
-	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
+	RED.httpAdmin.get("/instagramfeed-credentials/auth/callback", function(req, res) {
 		var state = req.query.state.split(":");
 		var node_id = state[0];
 		var csrfToken = state[1];

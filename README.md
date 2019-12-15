@@ -8,7 +8,7 @@ Install
 
 Run the following command in your ~/.node-red directory
 
-        npm install chuank/node-red-contrib-instagram
+        npm install chuank/node-red-contrib-instagramfeed
 
 
 Usage

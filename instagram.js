@@ -423,6 +423,11 @@ module.exports = function(RED) {
 			}
 		});
 
+		console.log("@@@@@@@@@ 1ST AUTH @@@@@@@@@");
+		console.log(url);
+		console.log("@@@@@@@@@ 1ST AUTH @@@@@@@@@");
+
+
 		res.redirect(url);
 		RED.nodes.addCredentials(node_id, credentials);
 	});
@@ -474,7 +479,9 @@ module.exports = function(RED) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
 			}
 
+			console.log("@@@@@@@@@ SHORT TOKEN @@@@@@@@@");
 			console.log(data);
+			console.log("@@@@@@@@@ SHORT TOKEN @@@@@@@@@");
 
 			if(data.user_id) {
 				credentials.user_id = data.user_id;

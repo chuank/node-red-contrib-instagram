@@ -467,6 +467,8 @@ module.exports = function(RED) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: result.statusCode, data: data}));
 			}
 
+			console.log(data);
+
 			if(data.user_id) {
 				credentials.user_id = data.user_id;
 			} else {

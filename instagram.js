@@ -94,6 +94,8 @@ module.exports = function(RED) {
 
 		// no longer using instagram_node; deprecated calls in that node make it unusable! rolling our own here on out...
 
+		console.log(node.credentials);
+
 		// curl -X GET 'https://graph.instagram.com/17841400980850763/media/?fields=media_type,media_url,caption,timestamp&access_token=IGQVJWZAURmbHhxdHF6WjJKOVVSNktnSEVrdjlOalFzT3ZAVVXVrbjVTSFpnQUVnVHZATbU5jeTR0MWt3MENrZAWgwNmt0VUwzTWVrT2hnSXpHMDVWWWc3TVFRbThnNjRnS01qYkdTNTJn'
 		var mediaUrl = "https://graph.instagram.com/" + node.credentials.user_id + "/media/?access_token=" + node.credentials.access_token;
 		mediaUrl += "&field=media_type,media_url,caption,timestamp";

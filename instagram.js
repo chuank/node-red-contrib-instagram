@@ -98,21 +98,23 @@ module.exports = function(RED) {
 		var mediaUrl = "https://graph.instagram.com/" + node.instagramConfig.credentials.user_id + "/media/?access_token=" + node.instagramConfig.credentials.access_token;
 		mediaUrl += "&field=media_type,media_url,caption,timestamp";
 
-		request.get(mediaUrl, function(err, res, data){
-			if (err) {
-				return res.send(RED._("instagram.error.request-error", {err: err}));
-			}
-			if (data.error) {
-				return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
-			}
-			if(res.statusCode !== 200) {
-				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
-			}
+		console.log(mediaUrl);
 
-			var pData2 = JSON.parse(data);
-			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
-			console.log(pData2);
-			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
+		// request.get(mediaUrl, function(err, res, data){
+		// 	if (err) {
+		// 		return res.send(RED._("instagram.error.request-error", {err: err}));
+		// 	}
+		// 	if (data.error) {
+		// 		return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+		// 	}
+		// 	if(res.statusCode !== 200) {
+		// 		return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+		// 	}
+		//
+		// 	var pData2 = JSON.parse(data);
+		// 	console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
+		// 	console.log(pData2);
+		// 	console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
 		});
 
 

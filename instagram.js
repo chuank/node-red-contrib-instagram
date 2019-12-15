@@ -479,7 +479,7 @@ module.exports = function(RED) {
 			}
 
 			console.log("@@@@@@@@@ SHORT TOKEN @@@@@@@@@");
-			console.log(data);
+			console.log(result);
 			console.log("@@@@@@@@@ SHORT TOKEN @@@@@@@@@");
 
 			if(data.user_id) {

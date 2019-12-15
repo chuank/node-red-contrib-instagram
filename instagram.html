@@ -15,8 +15,8 @@
 -->
 
 
-<script type="text/x-red" data-template-name="instagramfeed-credentials">
-    <div id="node-config-instagramfeed-app-keys">
+<script type="text/x-red" data-template-name="instagram-credentials">
+    <div id="node-config-instagram-app-keys">
         <div class="form-row">
             <p style="margin-top: 10px;"><b>1.</b> <span data-i18n="instagram.label.create"></span> <a href="https://developers.facebook.com/docs/instagram-basic-display-api/getting-started" target="_blank" style="text-decoration:underline;">developers.facebook.com</a></p>
         </div>
@@ -43,18 +43,18 @@
            <a class="btn" id="node-config-start-auth" href="#" target="_blank"><span data-i18n="instagram.label.authenticate"></span></a>
         </div>
     </div>
-    <div id="node-config-instagramfeed-user">
+    <div id="node-config-instagram-user">
         <div class="form-row">
-            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagramfeed-user_id" class="input-xlarge uneditable-input"></span>
+            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagram-user_id" class="input-xlarge uneditable-input"></span>
         </div>
         <input type="hidden" id="node-config-input-user_id">
     </div>
 </script>
 
-<script type="text/x-red" data-template-name="instagramfeed">
+<script type="text/x-red" data-template-name="instagram">
     <div class="form-row">
-        <label for="node-input-instagramfeed"><i class="fa fa-user"></i> <span data-i18n="instagram.label.user"></span></label>
-        <input type="text" id="node-input-instagramfeed">
+        <label for="node-input-instagram"><i class="fa fa-user"></i> <span data-i18n="instagram.label.user"></span></label>
+        <input type="text" id="node-input-instagram">
     </div>
     <div class="form-row">
         <label for="node-input-outputType"><i class="icon-search"></i> <span data-i18n="instagram.label.output"></span></label>
@@ -73,7 +73,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="instagramfeed">
+<script type="text/x-red" data-help-name="instagram">
     <p>Get photos from Instagram.</p>
     <p>More information coming.</p>
     <p>Videos are currently not supported and are ignored.</p>
@@ -82,7 +82,7 @@
 <script type="text/javascript">
 (function() {
 
-	RED.nodes.registerType("instagramfeed-credentials",{
+	RED.nodes.registerType("instagram-credentials",{
 		category: "config",
 		defaults: {
 			user_id: {value: ""}
@@ -105,7 +105,7 @@
 			if (pathname.slice(-1) != "/") {
 				pathname += "/";
 			}
-			var constructedURI = location.protocol + "//" + location.hostname + (location.port ? ":"+location.port : "") + pathname + "instagramfeed-credentials/auth/callback";
+			var constructedURI = location.protocol + "//" + location.hostname + (location.port ? ":"+location.port : "") + pathname + "instagram-credentials/auth/callback";
 			var tip = this._("instagram.tip.redirect", {constructedURI: constructedURI});
 
 			function updateInstagramAuthButton() {
@@ -124,7 +124,7 @@
 			}
 
 			function pollInstagramCredentials() {
-				$.getJSON("credentials/instagramfeed-credentials/"+id,function(data) {
+				$.getJSON("credentials/instagram-credentials/"+id,function(data) {
 					if (data.user_id) {    // means authentication has been successful
 						$("#node-config-dialog-ok").button("enable");
 						updateInstagramScreenName(data.user_id);
@@ -140,8 +140,8 @@
 			if (this.user_id) {
 				updateInstagramScreenName(this.user_id);
 			} else {
-				$("#node-config-instagramfeed-app-keys").show();
-				$("#node-config-instagramfeed-user").hide();
+				$("#node-config-instagram-app-keys").show();
+				$("#node-config-instagram-user").hide();
 				$("#node-config-dialog-ok").button("disable");
 			}
 
@@ -160,7 +160,7 @@
 				var redirectURI = $("#node-config-input-redirectURI").val();
 
 				var query = "node_id=" + id + "&app_id=" + appID + "&app_secret=" + appSecret + "&redirect_uri=" + redirectURI;
-				var url = "instagramfeed-credentials/auth/?" + query;
+				var url = " -credentials/auth/?" + query;
 				$(this).attr("href",url);
 				window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials, 2000);
 			});
@@ -191,10 +191,10 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType("instagramfeed",{
+    RED.nodes.registerType("instagram",{
     	category: "social",
     	defaults: {
-    		instagram: { type:"instagramfeed-credentials", required: true },
+    		instagram: { type:"instagram-credentials", required: true },
     		inputType: { value:"photo"},
     		outputType: { value:"link" },
     		interval: { value:60 },

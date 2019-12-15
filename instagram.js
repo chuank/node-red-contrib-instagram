@@ -349,7 +349,7 @@ module.exports = function(RED) {
 		}
 	}
 
-	function InstagramFeedNode(n) {
+	function InstagramNode(n) {
 		RED.nodes.createNode(this,n);
 
 		var node = this;
@@ -372,7 +372,7 @@ module.exports = function(RED) {
 		});
 	}
 
-	RED.nodes.registerType("instagramfeed-credentials", InstagramCredentialsNode, {
+	RED.nodes.registerType("instagram-credentials", InstagramCredentialsNode, {
 		credentials: {
 			user_id: {type:"text"},
 			app_id: {type:"text"},
@@ -383,9 +383,9 @@ module.exports = function(RED) {
 		}
 	});
 
-	RED.nodes.registerType("instagramfeed", InstagramFeedNode);
+	RED.nodes.registerType("instagram", InstagramNode);
 
-	RED.httpAdmin.get("/instagramfeed-credentials/auth", function(req, res) {
+	RED.httpAdmin.get("/instagram-credentials/auth", function(req, res) {
 		var node_id = req.query.node_id;
 
 		var credentials = RED.nodes.getCredentials(node_id) || {};
@@ -418,7 +418,7 @@ module.exports = function(RED) {
 		RED.nodes.addCredentials(node_id,credentials);
 	});
 
-	RED.httpAdmin.get("/instagramfeed-credentials/auth/callback", function(req, res) {
+	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
 		var state = req.query.state.split(":");
 		var node_id = state[0];
 		var csrfToken = state[1];

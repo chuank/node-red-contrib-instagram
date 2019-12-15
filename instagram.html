@@ -45,9 +45,9 @@
     </div>
     <div id="node-config-instagram-user">
         <div class="form-row">
-            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagram-user_id" class="input-xlarge uneditable-input"></span>
+            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagram-username" class="input-xlarge uneditable-input"></span>
         </div>
-        <input type="hidden" id="node-config-input-user_id">
+        <input type="hidden" id="node-config-input-username">
     </div>
 </script>
 
@@ -98,7 +98,7 @@
 			expires_in: {type:"number"}       // expiry date (in seconds) of long-lived access token
 		},
 		label: function() {
-			return this.user_id;           // TODO: change to retrieve username once authenticated
+			return this.username;           // TODO: change to retrieve username once authenticated
 		},
 		exportable: false,
 		oneditprepare: function() {
@@ -121,8 +121,8 @@
 			function updateInstagramScreenName(sn) {
 				$("#node-config-instagram-app-keys").hide();
 				$("#node-config-instagram-user").show();
-				$("#node-config-input-user_id").val(sn);
-				$("#node-config-instagram-user_id").html(sn);
+				$("#node-config-input-username").val(sn);
+				$("#node-config-instagram-username").html(sn);
 			}
 
 			function pollInstagramCredentials() {
@@ -139,8 +139,8 @@
 
 			updateInstagramAuthButton();
 
-			if (this.user_id) {
-				updateInstagramScreenName(this.user_id);
+			if (this.username) {
+				updateInstagramScreenName(this.username);
 			} else {
 				$("#node-config-instagram-app-keys").show();
 				$("#node-config-instagram-user").hide();

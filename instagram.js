@@ -98,24 +98,24 @@ module.exports = function(RED) {
 		mediaUrl += "?fields=media_type,media_url,caption,timestamp";
 		mediaUrl += "&access_token=" + node.instagramConfig.credentials.access_token;
 
-		console.log(node.instagramConfig.credentials);
+		console.log(mediaUrl);
 
-		// request.get(mediaUrl, function(err, res, data){
-		// 	if (err) {
-		// 		return res.send(RED._("instagram.error.request-error", {err: err}));
-		// 	}
-		// 	if (data.error) {
-		// 		return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
-		// 	}
-		// 	if(res.statusCode !== 200) {
-		// 		return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
-		// 	}
-		//
-		// 	var pData2 = JSON.parse(data);
-		// 	console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
-		// 	console.log(pData2);
-		// 	console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
-		// });
+		request.get(mediaUrl, function(err, res, data){
+			if (err) {
+				return res.send(RED._("instagram.error.request-error", {err: err}));
+			}
+			if (data.error) {
+				return res.send(RED._("instagram.error.request-error", {error: data.error}));
+			}
+			if(res.statusCode !== 200) {
+				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+			}
+
+			var pData = JSON.parse(data);
+			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
+			console.log(pData);
+			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
+		});
 
 
 		// Now grab initial state but only grab the ones we're concerned with

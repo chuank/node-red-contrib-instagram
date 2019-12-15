@@ -89,8 +89,9 @@
 		},
 		credentials: {
 			user_id: {type:"text"},         // Instagram user ID (numerical)
-			app_id: {type:"text"},          // Instagram Basic Display API app_id
-			app_secret: {type:"password"},  // Instagram Basic Display API app_secret
+			username: {type:"text"},        // Basic Display API username
+			app_id: {type:"text"},          // Basic Display API app_id
+			app_secret: {type:"password"},  // Basic Display API app_secret
 			redirectURI: {type:"text"},
 			access_token: {type:"password"},
 			expires_in: {type:"number"}       // expiry date (in seconds) of long-lived access token
@@ -100,7 +101,7 @@
 		},
 		exportable: false,
 		oneditprepare: function() {
-			var id = this.id;
+			var node_id = this.id;
 			var pathname = document.location.pathname;
 			if (pathname.slice(-1) != "/") {
 				pathname += "/";
@@ -124,10 +125,10 @@
 			}
 
 			function pollInstagramCredentials() {
-				$.getJSON("credentials/instagram-credentials/"+id,function(data) {
+				$.getJSON("credentials/instagram-credentials/"+node_id,function(data) {
 					if (data.user_id) {    // means authentication has been successful
 						$("#node-config-dialog-ok").button("enable");
-						updateInstagramScreenName(data.user_id);
+						updateInstagramScreenName(data.username);
 						delete window.instagramConfigNodeIntervalId;
 					} else {
 						window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials,2000);
@@ -159,7 +160,7 @@
 				var appSecret = $("#node-config-input-appSecret").val();
 				var redirectURI = $("#node-config-input-redirectURI").val();
 
-				var query = "node_id=" + id + "&app_id=" + appID + "&app_secret=" + appSecret + "&redirect_uri=" + redirectURI;
+				var query = "node_id=" + node_id + "&app_id=" + appID + "&app_secret=" + appSecret + "&redirect_uri=" + redirectURI;
 				var url = "instagram-credentials/auth/?" + query;
 				$(this).attr("href",url);
 				window.instagramConfigNodeIntervalId = window.setTimeout(pollInstagramCredentials, 2000);

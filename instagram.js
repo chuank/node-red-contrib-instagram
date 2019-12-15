@@ -96,9 +96,8 @@ module.exports = function(RED) {
 
 		// curl -X GET 'https://graph.instagram.com/17841400980850763/media/?fields=media_type,media_url,caption,timestamp&access_token=IGQVJWZAURmbHhxdHF6WjJKOVVSNktnSEVrdjlOalFzT3ZAVVXVrbjVTSFpnQUVnVHZATbU5jeTR0MWt3MENrZAWgwNmt0VUwzTWVrT2hnSXpHMDVWWWc3TVFRbThnNjRnS01qYkdTNTJn'
 		var mediaUrl = "https://graph.instagram.com/" + node.instagramConfig.credentials.user_id + "/media/";
-		mediaUrl += "?field=media_type,media_url,caption,timestamp";
+		mediaUrl += "?fields=media_type,media_url,caption,timestamp";
 		mediaUrl += "&access_token=" + node.instagramConfig.credentials.access_token;
-
 
 		// https://graph.instagram.com/17841400980850763/media/?fields=media_type,media_url,caption,timestamp&access_token=IGQVJWZAURmbHhxdHF6WjJKOVVSNktnSEVrdjlOalFzT3ZAVVXVrbjVTSFpnQUVnVHZATbU5jeTR0MWt3MENrZAWgwNmt0VUwzTWVrT2hnSXpHMDVWWWc3TVFRbThnNjRnS01qYkdTNTJn
 

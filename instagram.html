@@ -16,7 +16,7 @@
 
 
 <script type="text/x-red" data-template-name="instagramfeed-credentials">
-    <div id="node-config-instagram-app-keys">
+    <div id="node-config-instagramfeed-app-keys">
         <div class="form-row">
             <p style="margin-top: 10px;"><b>1.</b> <span data-i18n="instagram.label.create"></span> <a href="https://developers.facebook.com/docs/instagram-basic-display-api/getting-started" target="_blank" style="text-decoration:underline;">developers.facebook.com</a></p>
         </div>
@@ -43,9 +43,9 @@
            <a class="btn" id="node-config-start-auth" href="#" target="_blank"><span data-i18n="instagram.label.authenticate"></span></a>
         </div>
     </div>
-    <div id="node-config-instagram-user">
+    <div id="node-config-instagramfeed-user">
         <div class="form-row">
-            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagram-user_id" class="input-xlarge uneditable-input"></span>
+            <label><i class="fa fa-user"></i> <span data-i18n="instagram.label.instagramuser"></span></label><span id="node-config-instagramfeed-user_id" class="input-xlarge uneditable-input"></span>
         </div>
         <input type="hidden" id="node-config-input-user_id">
     </div>
@@ -124,7 +124,7 @@
 			}
 
 			function pollInstagramCredentials() {
-				$.getJSON("credentials/instagram-credentials/"+id,function(data) {
+				$.getJSON("credentials/instagramfeed-credentials/"+id,function(data) {
 					if (data.user_id) {    // means authentication has been successful
 						$("#node-config-dialog-ok").button("enable");
 						updateInstagramScreenName(data.user_id);
@@ -140,8 +140,8 @@
 			if (this.user_id) {
 				updateInstagramScreenName(this.user_id);
 			} else {
-				$("#node-config-instagram-app-keys").show();
-				$("#node-config-instagram-user").hide();
+				$("#node-config-instagramfeed-app-keys").show();
+				$("#node-config-instagramfeed-user").hide();
 				$("#node-config-dialog-ok").button("disable");
 			}
 

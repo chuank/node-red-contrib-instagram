@@ -377,6 +377,7 @@ module.exports = function(RED) {
 	RED.nodes.registerType("instagram-credentials", InstagramCredentialsNode, {
 		credentials: {
 			user_id: {type:"text"},
+			username: {type:"text"},
 			app_id: {type:"text"},
 			app_secret: {type:"password"},
 			redirect_uri: { type:"text"},

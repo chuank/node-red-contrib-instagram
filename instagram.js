@@ -95,8 +95,12 @@ module.exports = function(RED) {
 		// no longer using instagram_node; deprecated calls in that node make it unusable! rolling our own here on out...
 
 		// curl -X GET 'https://graph.instagram.com/17841400980850763/media/?fields=media_type,media_url,caption,timestamp&access_token=IGQVJWZAURmbHhxdHF6WjJKOVVSNktnSEVrdjlOalFzT3ZAVVXVrbjVTSFpnQUVnVHZATbU5jeTR0MWt3MENrZAWgwNmt0VUwzTWVrT2hnSXpHMDVWWWc3TVFRbThnNjRnS01qYkdTNTJn'
-		var mediaUrl = "https://graph.instagram.com/" + node.instagramConfig.credentials.user_id + "/media/?access_token=" + node.instagramConfig.credentials.access_token;
-		mediaUrl += "&field=media_type,media_url,caption,timestamp";
+		var mediaUrl = "https://graph.instagram.com/" + node.instagramConfig.credentials.user_id + "/media/";
+		mediaUrl += "?field=media_type,media_url,caption,timestamp";
+		mediaUrl += "?access_token=" + node.instagramConfig.credentials.access_token;
+
+		// IGQVJWZAURmbHhxdHF6WjJKOVVSNktnSEVrdjlOalFzT3ZAVVXVrbjVTSFpnQUVnVHZATbU5jeTR0MWt3MENrZAWgwNmt0VUwzTWVrT2hnSXpHMDVWWWc3TVFRbThnNjRnS01qYkdTNTJn
+		// IGQVJVZAWZA2RFd4MHBpTGRlVks2Ul85WHg4NjBGNERXekxRcm1fWmxZAMFRwX3VWX2NFRTd2ZAk5rU1ZAxUFEzRGRneGd4ZA0N5NG44U1Y0X2lWak5mdjZAiLXpmSDVSTFVMZAXo0X3JtMUFR
 
 		console.log(mediaUrl);
 

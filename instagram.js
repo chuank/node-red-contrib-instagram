@@ -144,7 +144,7 @@ module.exports = function(RED) {
 			// for now, this call seems to retrieve ALL of a user's media with a 10k count limit
 			// field expansion to apply a limit is unsupported!
 			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
-			console.log(media.length);
+			console.log(media);
 			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
 
 			var msg = {};

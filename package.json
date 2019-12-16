@@ -1,7 +1,7 @@
 {
     "name"          : "node-red-contrib-instagram",
-    "version"       : "0.0.1",
-    "description"   : "Node-RED nodes to retrieve photos & metadata from Instagram",
+    "version"       : "1.0.0",
+    "description"   : "Retrieve a user's photo url & metadata from Instagram",
     "dependencies"  : {
         "request":"~2.74.0"
     },

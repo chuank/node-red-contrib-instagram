@@ -16,7 +16,7 @@
             "authenticate": "Authenticate with Instagram",
             "instagramuser": "Instagram User",
             "pollinterval": "Poll interval (seconds)",
-            "pollintervalmin": "API limit minimum: 18 seconds"
+            "pollintervalmin": "API limit: 18 seconds. 0 = never refresh"
         },
         "placeholder": {
             "name": "Name"

@@ -116,11 +116,11 @@ module.exports = function(RED) {
 		retrieveIGMedia(node);
 
 		// setup an interval to call retrieveIGMedia
-		if(node.interval) {
-			node.intervalID = setInterval(function() { // self trigger
-				retrieveIGMedia(node);
-			}, node.interval*1000);
-		}
+		// if(node.interval) {
+		// 	node.intervalID = setInterval(function() { // self trigger
+		// 		retrieveIGMedia(node);
+		// 	}, node.interval*1000);
+		// }
 	}
 
 	function retrieveIGMedia(node) {
@@ -149,11 +149,9 @@ module.exports = function(RED) {
 			// console.log(media);
 			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
 
-			for (var key in media) {
-				if (media.hasOwnProperty(key)) {
-					console.log(key + " -> " + media[key]);
-				}
-			}
+			var msg = {};
+			msg.payload = media;
+			node.send(msg);
 		});
 	}
 
@@ -265,88 +263,88 @@ module.exports = function(RED) {
 		}
 	}
 
-	// function handleInputNodeInput(node, msg) {
-	// 	var areWeInPaginationRecursion = false;
-	//
-	// 	var idOfLikedReturned;
-	// 	var idOfSelfReturned;
-	//
-	// 	var returnPagefulsOfStuff = function(err, medias, pagination, remaining, limit) {
-	//
-	// 		var carryOnPaginating = true;
-	//
-	// 		if (err) {
-	// 			node.warn(RED._("instagram.warn.latest-media-fetch-failed", {err: err}));
-	// 		}
-	//
-	// 		if(medias) {
-	// 			for(var i = 0; i < medias.length; i++) {
-	// 				if (node.inputType === "like") { // like is a special case as per Instagram API behaviour
-	// 					if(areWeInPaginationRecursion === false) { // need to set the pointer of latest served liked image before pagination occurs
-	// 						idOfLikedReturned = medias[0].id;
-	// 					}
-	// 					if (medias[i].id === node.latestLikedID || node.latestLikedID === null) { // we finally found the image we already returned or has been there at init
-	// 						node.latestLikedID = idOfLikedReturned; // we need to assign the latest liked to the one we returned first => can only do node at the end, otherwise we'd never match break condition and always return everything
-	// 						carryOnPaginating = false;
-	// 						break;
-	// 					}
-	// 				}
-	//
-	// 				if (node.inputType === "photo" && i === 0 && (areWeInPaginationRecursion === false) ) { // only set the served self content ID to equal the first media of the first pagination page and ignore on subsequent pages
-	// 					idOfSelfReturned = medias[i].id;
-	// 				}
-	//
-	// 				if (node.inputType === "photo" && (medias[i].id === node.latestSelfContentID) ) { // if we say to the Insta API that we want images more recent than image id "blah", it returns image with that id too
-	// 					//deliberate no-op
-	// 				} else if(medias[i].type === IMAGE) {
-	// 					var url = medias[i].images.standard_resolution.url;
-	//
-	// 					if(medias[i].location) {
-	// 						if(medias[i].location.latitude) {
-	// 							if(!msg.location) {
-	// 								msg.location = {};
-	// 							}
-	// 							msg.location.lat = medias[i].location.latitude;
-	// 						}
-	// 						if(medias[i].location.longitude) {
-	// 							if(!msg.location) {
-	// 								msg.location = {};
-	// 							}
-	// 							msg.location.lon = medias[i].location.longitude;
-	// 						}
-	// 					}
-	//
-	// 					if(medias[i].created_time) {
-	// 						msg.time = new Date(medias[i].created_time * 1000);
-	// 					}
-	//
-	// 					if (node.outputType === "link") {
-	// 						msg.payload = url;
-	// 						node.send(msg);
-	// 					} else if (node.outputType === "buffer") {
-	// 						downloadImageAndSendAsBuffer(node, url, msg);
-	// 					}
-	// 				}
-	// 			}
-	// 		} else if(areWeInPaginationRecursion === false) {
-	// 			node.warn(RED._("instagram.warn.media-fetch-failed"));
-	// 			return;
-	// 		}
-	// 		if(pagination && pagination.next && carryOnPaginating) {
-	// 			areWeInPaginationRecursion = true;
-	// 			pagination.next(returnPagefulsOfStuff);
-	// 		} else {
-	// 			node.latestSelfContentID = idOfSelfReturned;
-	// 		}
-	// 	};
-	//
-	// 	// If we're processing user content
-	// 	if (node.inputType === "photo") {
-	// 		node.ig.user_media_recent("self", { count : null, min_id : node.latestSelfContentID, max_id : null}, returnPagefulsOfStuff);
-	// 	} else if (node.inputType === "like") { // If we're processing likes
-	// 		node.ig.user_self_liked({ count : null, max_like_id : null}, returnPagefulsOfStuff);
-	// 	}
-	// }
+	function handleInputNodeInput(node, msg) {
+		var areWeInPaginationRecursion = false;
+
+		var idOfLikedReturned;
+		var idOfSelfReturned;
+
+		var returnPagefulsOfStuff = function(err, medias, pagination, remaining, limit) {
+
+			var carryOnPaginating = true;
+
+			if (err) {
+				node.warn(RED._("instagram.warn.latest-media-fetch-failed", {err: err}));
+			}
+
+			if(medias) {
+				for(var i = 0; i < medias.length; i++) {
+					if (node.inputType === "like") { // like is a special case as per Instagram API behaviour
+						if(areWeInPaginationRecursion === false) { // need to set the pointer of latest served liked image before pagination occurs
+							idOfLikedReturned = medias[0].id;
+						}
+						if (medias[i].id === node.latestLikedID || node.latestLikedID === null) { // we finally found the image we already returned or has been there at init
+							node.latestLikedID = idOfLikedReturned; // we need to assign the latest liked to the one we returned first => can only do node at the end, otherwise we'd never match break condition and always return everything
+							carryOnPaginating = false;
+							break;
+						}
+					}
+
+					if (node.inputType === "photo" && i === 0 && (areWeInPaginationRecursion === false) ) { // only set the served self content ID to equal the first media of the first pagination page and ignore on subsequent pages
+						idOfSelfReturned = medias[i].id;
+					}
+
+					if (node.inputType === "photo" && (medias[i].id === node.latestSelfContentID) ) { // if we say to the Insta API that we want images more recent than image id "blah", it returns image with that id too
+						//deliberate no-op
+					} else if(medias[i].type === IMAGE) {
+						var url = medias[i].images.standard_resolution.url;
+
+						if(medias[i].location) {
+							if(medias[i].location.latitude) {
+								if(!msg.location) {
+									msg.location = {};
+								}
+								msg.location.lat = medias[i].location.latitude;
+							}
+							if(medias[i].location.longitude) {
+								if(!msg.location) {
+									msg.location = {};
+								}
+								msg.location.lon = medias[i].location.longitude;
+							}
+						}
+
+						if(medias[i].created_time) {
+							msg.time = new Date(medias[i].created_time * 1000);
+						}
+
+						if (node.outputType === "link") {
+							msg.payload = url;
+							node.send(msg);
+						} else if (node.outputType === "buffer") {
+							downloadImageAndSendAsBuffer(node, url, msg);
+						}
+					}
+				}
+			} else if(areWeInPaginationRecursion === false) {
+				node.warn(RED._("instagram.warn.media-fetch-failed"));
+				return;
+			}
+			if(pagination && pagination.next && carryOnPaginating) {
+				areWeInPaginationRecursion = true;
+				pagination.next(returnPagefulsOfStuff);
+			} else {
+				node.latestSelfContentID = idOfSelfReturned;
+			}
+		};
+
+		// If we're processing user content
+		if (node.inputType === "photo") {
+			node.ig.user_media_recent("self", { count : null, min_id : node.latestSelfContentID, max_id : null}, returnPagefulsOfStuff);
+		} else if (node.inputType === "like") { // If we're processing likes
+			node.ig.user_self_liked({ count : null, max_like_id : null}, returnPagefulsOfStuff);
+		}
+	}
 
 	RED.nodes.registerType("instagram-credentials", InstagramCredentialsNode, {
 		credentials: {

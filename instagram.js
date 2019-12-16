@@ -98,7 +98,7 @@ module.exports = function(RED) {
 		mediaUrl += "?fields=media_type,media_url,caption,timestamp";
 		mediaUrl += "&access_token=" + node.instagramConfig.credentials.access_token;
 
-		console.log(mediaUrl);
+		// console.log(mediaUrl);
 
 		request.get(mediaUrl, function(err, res, data){
 			if (err) {
@@ -111,10 +111,24 @@ module.exports = function(RED) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
 			}
 
-			var pData = JSON.parse(data);
+			var pData = JSON.parse(data);		// pData will get re-used by each pagination
+			var media = JSON.parse(JSON.stringify(pData.data));		// media collates all data
+
 			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
-			console.log(pData);
+			console.log(pData.paging);
 			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
+
+			if(pData.paging.next) {
+				// means there's more pages of stuff; continue to retrieve them
+
+
+			}
+			// pagination? get all entries!
+
+
+
+
+
 		});
 
 

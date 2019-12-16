@@ -140,15 +140,14 @@ module.exports = function(RED) {
 				return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
 			}
 
-			var media = data.data;		// media collates all data
 			// for now, this call seems to retrieve ALL of a user's media with a 10k count limit
 			// field expansion to apply a limit is unsupported!
 			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
-			console.log(media);
+			console.log(data);
 			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
 
 			var msg = {};
-			msg.payload = media;
+			msg.payload = data;
 			node.send(msg);
 		});
 	}

@@ -146,7 +146,7 @@ module.exports = function(RED) {
 			// field expansion to apply a limit is unsupported!
 			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
 			console.log(media.length);
-			console.log(media);
+			// console.log(media);
 			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
 
 			for (var key in media) {

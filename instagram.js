@@ -112,16 +112,14 @@ module.exports = function(RED) {
 		// setup an interval to call retrieveIGMedia
 		if(node.pollInterval) {			// if user specified 0, don't start pollInterval
 			node.pollIntervalID = setInterval(function() { // self trigger
-				console.log("pollInterval triggered");
 				retrieveIGMedia(node);
 			}, node.pollInterval*1000);
 		}
 	}
 
 	function retrieveIGMedia(node) {
-		// no longer using instagram_node; deprecated calls in that node make it unusable! rolling our own here on out...
 		var mediaUrl = "https://graph.instagram.com/" + node.instagramConfig.credentials.user_id + "/media/";
-		mediaUrl += "?fields=media_type,media_url,caption,timestamp";
+		mediaUrl += "?fields=id,media_type,caption,media_url,thumbnail_url,timestamp";
 		mediaUrl += "&access_token=" + node.instagramConfig.credentials.access_token;
 
 		request.get(mediaUrl, function(err, res, data){
@@ -150,6 +148,7 @@ module.exports = function(RED) {
 		credentials: {
 			user_id: {type:"text"},
 			username: {type:"text"},
+			account_type: {type:"text"},
 			app_id: {type:"text"},
 			app_secret: {type:"password"},
 			redirect_uri: { type:"text"},
@@ -265,7 +264,7 @@ module.exports = function(RED) {
 					// NOTE: previous user_id might be offset by +/- 1 (thanks FB?!?); making an API call to /me retrieves the correct value
 					// also take this opportunity to grab the username string
 					var userUrl = "https://graph.instagram.com/me/?access_token=" + data.access_token;
-					userUrl += "&fields=username";
+					userUrl += "&fields=username,account_type,media_count";
 
 					request.get(userUrl, function(err3, res3, data3){
 						if (err3) {
@@ -290,6 +289,13 @@ module.exports = function(RED) {
 						} else {
 							return res.send(RED._("instagram.error.username-fetch-fail"));
 						}
+						if(pData3.username) {
+							credentials.account_type = pData3.account_type;
+						} else {
+							return res.send(RED._("instagram.error.account_type-fetch-fail"));
+						}
+
+						console.log("media count should be:", pData3.media_count);
 
 						// now we have all of the correct data, set it into the credentials objects
 						delete credentials.code;

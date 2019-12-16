@@ -50,6 +50,7 @@
             "user_id-fetch-fail": "Error! Instagram node has failed to fetch the user_id.",
             "username-fetch-fail": "Error! Instagram node has failed to fetch the username.",
             "accesstoken-fetch-fail": "Error! Instagram node has failed to fetch a valid access token.",
+            "account_type-fetch-fail": "Error! Instagram node has failed to fetch the account type.",
             "instagram.error.accesstoken-expiry-fail": "Error! Instagram node has failed to fetch an expiry time for the access token."
         },
         "message": {

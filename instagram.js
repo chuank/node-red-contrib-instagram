@@ -33,7 +33,7 @@ module.exports = function(RED) {
 		// IG's beta implementation of long-lived tokens (60 days) – credential node will check and refresh automatically after 60 days
 		refreshLongLivedAccessToken(node);
 
-		node.interval = setInterval(function() {
+		node.refreshTokenIntervalID = setInterval(function() {
 			refreshLongLivedAccessToken(node);
 		}, 900*1000);													// check for expired token every 15 minutes
 	}
@@ -42,8 +42,7 @@ module.exports = function(RED) {
 		RED.nodes.createNode(this,n);
 
 		var node = this;
-		node.inputType = n.inputType;
-		node.outputType = n.outputType;
+		node.pollInterval = n.pollinterval;
 
 		node.instagramConfig = RED.nodes.getNode(n.instagram);
 		if (!node.instagramConfig) {
@@ -59,9 +58,12 @@ module.exports = function(RED) {
 			retrieveIGMedia(node);
 		});
 
-		node.on("close", function() {
-			node.inputType = null;
-			node.outputType = null;
+		node.on("close", function() {		// tidy up!
+			clearInterval(node.refreshTokenIntervalID);			//long-lived token refresh (15min)
+			delete node.refreshTokenIntervalID;
+
+			clearInterval(node.pollIntervalID);							//media feed poll interval
+			delete node.pollIntervalID;
 		});
 	}
 
@@ -108,10 +110,11 @@ module.exports = function(RED) {
 		retrieveIGMedia(node);
 
 		// setup an interval to call retrieveIGMedia
-		if(node.interval) {
-			node.intervalID = setInterval(function() { // self trigger
+		if(node.pollInterval) {			// if user specified 0, don't start pollInterval
+			node.pollIntervalID = setInterval(function() { // self trigger
+				console.log("pollInterval triggered");
 				retrieveIGMedia(node);
-			}, node.interval*1000);
+			}, node.pollInterval*1000);
 		}
 	}
 

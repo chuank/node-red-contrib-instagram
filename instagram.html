@@ -62,15 +62,8 @@
         <input type="text" id="node-input-instagram">
     </div>
     <div class="form-row">
-        <label for="node-input-outputType"><i class="icon-search"></i> <span data-i18n="instagram.label.output"></span></label>
-        <select type="text" id="node-input-outputType" style="display: inline-block; vertical-align: middle; width:60%;">
-            <option value="buffer" data-i18n="instagram.label.buffer"></option>
-            <option value="link" data-i18n="instagram.label.url"></option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-interval"><i class="fa fa-repeat"></i> <span data-i18n="instagram.label.pollinterval"></span></label>
-        <input type="text" id="node-input-interval" style="width:10%;">
+        <label for="node-input-pollinterval"><i class="fa fa-repeat"></i> <span data-i18n="instagram.label.pollinterval"></span></label>
+        <input type="text" id="node-input-pollinterval" style="width:10%;">
         <span data-i18n="instagram.label.pollintervalmin"></span>
     </div>
     <div class="form-row">
@@ -83,7 +76,7 @@
     <p>Get photos from Instagram via the Facebook/Instagram Basic Display API.</p>
     <p>With the adoption of Facebook Graph API for Instagram, stricter permissions and OAuth tokens are now a requirement.</p>
     <p>This node provides login, authentication and the provisioning of a long-life access token which is also automatically refreshed by the node.</p>
-    <p>Setting an interval allows regular polling of the Instagram API for new content. The first element in the returned array is always the latest item.</p>
+    <p>Setting an interval allows regular polling of the Instagram API for new content. Set to 0 for manual triggering. The first element in the returned array is always the latest item.</p>
     <p>Up to 10K of the most recent media elements are returned.</p>
     <p>Some initial setup of your Facebook Developer account and app is needed. Follow the <a href="https://developers.facebook.com/docs/instagram-basic-display-api/getting-started" target="_blank">Getting Started guide</a> on Facebook.</p>
 </script>
@@ -206,9 +199,7 @@
     	category: "social",
     	defaults: {
     		instagram: { type:"instagram-credentials", required: true },
-    		inputType: { value:"photo"},
-    		outputType: { value:"link" },
-    		interval: { value:60, validate:function(v) {
+    		pollinterval: { value:60, validate:function(v) {
     			return v >= 18;
     		}
     		},

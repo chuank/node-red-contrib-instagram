@@ -37,7 +37,7 @@ module.exports = function(RED) {
 
 		node.interval = setInterval(function() {
 			refreshLongLivedAccessToken(node);
-		}, 900*1000);													// check every 15 minutes
+		}, 900*1000);													// check for expired token every 15 minutes
 	}
 
 	function InstagramNode(n) {
@@ -82,7 +82,7 @@ module.exports = function(RED) {
 
 				var pData = JSON.parse(data);
 				node.credentials.access_token = pData.access_token;
-				node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew
+				node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give extra 15 seconds just in case expiry clock is somehow askew
 
 				RED.nodes.addCredentials(node.id, node.credentials);
 			});
@@ -90,16 +90,16 @@ module.exports = function(RED) {
 	}
 
 	// WIP
-	function downloadImageAndSendAsBuffer(node, url, msg) {
-		request({ uri : url, encoding : null}, function (error, response, body) {
-			if (!error && response.statusCode === 200) {
-				msg.payload = body;
-				node.send(msg);
-			} else {
-				node.warn(RED._("instagram.warn.image-not-sent", {error: error, response: response}));
-			}
-		});
-	}
+	// function downloadImageAndSendAsBuffer(node, url, msg) {
+	// 	request({ uri : url, encoding : null}, function (error, response, body) {
+	// 		if (!error && response.statusCode === 200) {
+	// 			msg.payload = body;
+	// 			node.send(msg);
+	// 		} else {
+	// 			node.warn(RED._("instagram.warn.image-not-sent", {error: error, response: response}));
+	// 		}
+	// 	});
+	// }
 
 	// initialize the node: retrieve saved access token + obtain media from Instagram
 	function initializeNode(node) {
@@ -141,12 +141,10 @@ module.exports = function(RED) {
 			}
 
 			var media = JSON.parse(JSON.stringify(data.data));		// media collates all data
-
 			// for now, this call seems to retrieve ALL of a user's media with a 10k count limit
 			// field expansion to apply a limit is unsupported!
 			console.log("@@@@@@@@@@MEDIA@@@@@@@@@@@@");
 			console.log(media.length);
-			// console.log(media);
 			console.log("@@@@@@@@@@/MEDIA@@@@@@@@@@@");
 
 			var msg = {};
@@ -156,195 +154,195 @@ module.exports = function(RED) {
 	}
 
 	// function handleQueryNodeInput(node, msg) {
-		if (node.inputType === "photo") {
-			node.ig.user_media_recent("self", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
-				if (err) {
-					node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
-				}
-				if(medias.length > 0) { // if the user has uploaded something to Instagram already
-					if(medias[0].type === IMAGE) {
-						if(medias[0].location) {
-							if(medias[0].location.latitude) {
-								if(!msg.location) {
-									msg.location = {};
-								}
-								msg.location.lat = medias[0].location.latitude;
-							}
-							if(medias[0].location.longitude) {
-								if(!msg.location) {
-									msg.location = {};
-								}
-								msg.location.lon = medias[0].location.longitude;
-							}
-						}
+	// 	if (node.inputType === "photo") {
+	// 		node.ig.user_media_recent("self", { count : 1, min_id : null, max_id : null}, function(err, medias, pagination, remaining, limit) {
+	// 			if (err) {
+	// 				node.warn(RED._("instagram.warn.userphoto-fetch-fail", {err: err}));
+	// 			}
+	// 			if(medias.length > 0) { // if the user has uploaded something to Instagram already
+	// 				if(medias[0].type === IMAGE) {
+	// 					if(medias[0].location) {
+	// 						if(medias[0].location.latitude) {
+	// 							if(!msg.location) {
+	// 								msg.location = {};
+	// 							}
+	// 							msg.location.lat = medias[0].location.latitude;
+	// 						}
+	// 						if(medias[0].location.longitude) {
+	// 							if(!msg.location) {
+	// 								msg.location = {};
+	// 							}
+	// 							msg.location.lon = medias[0].location.longitude;
+	// 						}
+	// 					}
+	//
+	// 					if(medias[0].created_time) {
+	// 						msg.time = new Date(medias[0].created_time * 1000);
+	// 					}
+	//
+	// 					var url;
+	//
+	// 					if(medias[0].images && medias[0].images.standard_resolution && medias[0].images.standard_resolution.url) {
+	// 						url = medias[0].images.standard_resolution.url;
+	// 					} else {
+	// 						node.warn(RED._("instagram.warn.ignoring-media"));
+	// 						return;
+	// 					}
+	//
+	// 					if (node.outputType === "link") {
+	// 						msg.payload = url;
+	// 						node.send(msg);
+	// 					} else if (node.outputType === "buffer") {
+	// 						downloadImageAndSendAsBuffer(node, url, msg);
+	// 					}
+	//
+	// 				} else {
+	// 					node.warn(RED._("instagram.warn.not-a-photo"));
+	// 					return;
+	// 				}
+	// 			} else {
+	// 				msg.payload = null;
+	// 				node.send(msg);
+	// 				node.warn(RED._("instagram.warn.not-uploaded-yet"));
+	// 			}
+	// 		});
+	// 	} else if (node.inputType === "like") {
+	// 		node.ig.user_self_liked({ count : 1, max_like_id : null}, function(err, medias, pagination, remaining, limit) {
+	// 			if (err) {
+	// 				node.warn(RED._("instagram.warn.likedphoto-fetch-fail", {err: err}));
+	// 			}
+	// 			if(medias.length > 0) { // if the user has liked something to Instagram already
+	// 				if(medias[0].type === IMAGE) {
+	// 					if(medias[0].location) {
+	// 						if(medias[0].location.latitude) {
+	// 							if(!msg.location) {
+	// 								msg.location = {};
+	// 							}
+	// 							msg.location.lat = medias[0].location.latitude;
+	// 						}
+	// 						if(medias[0].location.longitude) {
+	// 							if(!msg.location) {
+	// 								msg.location = {};
+	// 							}
+	// 							msg.location.lon = medias[0].location.longitude;
+	// 						}
+	// 					}
+	//
+	// 					if(medias[0].created_time) {
+	// 						msg.time = new Date(medias[0].created_time * 1000);
+	// 					}
+	//
+	// 					var url;
+	//
+	// 					if(medias[0].images && medias[0].images.standard_resolution && medias[0].images.standard_resolution.url) {
+	// 						url = medias[0].images.standard_resolution.url;
+	// 					} else {
+	// 						node.warn(RED._("instagram.warn.ignoring-media"));
+	// 						return;
+	// 					}
+	//
+	// 					if (node.outputType === "link") {
+	// 						msg.payload = url;
+	// 						node.send(msg);
+	// 					} else if (node.outputType === "buffer") {
+	// 						downloadImageAndSendAsBuffer(node, url, msg);
+	// 					}
+	//
+	// 				} else {
+	// 					node.warn(RED._("instagram.warn.not-liked-photo"));
+	// 					return;
+	// 				}
+	// 			} else {
+	// 				msg.payload = null;
+	// 				node.send(msg);
+	// 				node.warn(RED._("instagram.warn.not-liked-yet"));
+	// 			}
+	// 		});
+	// 	}
+	// }
 
-						if(medias[0].created_time) {
-							msg.time = new Date(medias[0].created_time * 1000);
-						}
-
-						var url;
-
-						if(medias[0].images && medias[0].images.standard_resolution && medias[0].images.standard_resolution.url) {
-							url = medias[0].images.standard_resolution.url;
-						} else {
-							node.warn(RED._("instagram.warn.ignoring-media"));
-							return;
-						}
-
-						if (node.outputType === "link") {
-							msg.payload = url;
-							node.send(msg);
-						} else if (node.outputType === "buffer") {
-							downloadImageAndSendAsBuffer(node, url, msg);
-						}
-
-					} else {
-						node.warn(RED._("instagram.warn.not-a-photo"));
-						return;
-					}
-				} else {
-					msg.payload = null;
-					node.send(msg);
-					node.warn(RED._("instagram.warn.not-uploaded-yet"));
-				}
-			});
-		} else if (node.inputType === "like") {
-			node.ig.user_self_liked({ count : 1, max_like_id : null}, function(err, medias, pagination, remaining, limit) {
-				if (err) {
-					node.warn(RED._("instagram.warn.likedphoto-fetch-fail", {err: err}));
-				}
-				if(medias.length > 0) { // if the user has liked something to Instagram already
-					if(medias[0].type === IMAGE) {
-						if(medias[0].location) {
-							if(medias[0].location.latitude) {
-								if(!msg.location) {
-									msg.location = {};
-								}
-								msg.location.lat = medias[0].location.latitude;
-							}
-							if(medias[0].location.longitude) {
-								if(!msg.location) {
-									msg.location = {};
-								}
-								msg.location.lon = medias[0].location.longitude;
-							}
-						}
-
-						if(medias[0].created_time) {
-							msg.time = new Date(medias[0].created_time * 1000);
-						}
-
-						var url;
-
-						if(medias[0].images && medias[0].images.standard_resolution && medias[0].images.standard_resolution.url) {
-							url = medias[0].images.standard_resolution.url;
-						} else {
-							node.warn(RED._("instagram.warn.ignoring-media"));
-							return;
-						}
-
-						if (node.outputType === "link") {
-							msg.payload = url;
-							node.send(msg);
-						} else if (node.outputType === "buffer") {
-							downloadImageAndSendAsBuffer(node, url, msg);
-						}
-
-					} else {
-						node.warn(RED._("instagram.warn.not-liked-photo"));
-						return;
-					}
-				} else {
-					msg.payload = null;
-					node.send(msg);
-					node.warn(RED._("instagram.warn.not-liked-yet"));
-				}
-			});
-		}
-	}
-
-	function handleInputNodeInput(node, msg) {
-		var areWeInPaginationRecursion = false;
-
-		var idOfLikedReturned;
-		var idOfSelfReturned;
-
-		var returnPagefulsOfStuff = function(err, medias, pagination, remaining, limit) {
-
-			var carryOnPaginating = true;
-
-			if (err) {
-				node.warn(RED._("instagram.warn.latest-media-fetch-failed", {err: err}));
-			}
-
-			if(medias) {
-				for(var i = 0; i < medias.length; i++) {
-					if (node.inputType === "like") { // like is a special case as per Instagram API behaviour
-						if(areWeInPaginationRecursion === false) { // need to set the pointer of latest served liked image before pagination occurs
-							idOfLikedReturned = medias[0].id;
-						}
-						if (medias[i].id === node.latestLikedID || node.latestLikedID === null) { // we finally found the image we already returned or has been there at init
-							node.latestLikedID = idOfLikedReturned; // we need to assign the latest liked to the one we returned first => can only do node at the end, otherwise we'd never match break condition and always return everything
-							carryOnPaginating = false;
-							break;
-						}
-					}
-
-					if (node.inputType === "photo" && i === 0 && (areWeInPaginationRecursion === false) ) { // only set the served self content ID to equal the first media of the first pagination page and ignore on subsequent pages
-						idOfSelfReturned = medias[i].id;
-					}
-
-					if (node.inputType === "photo" && (medias[i].id === node.latestSelfContentID) ) { // if we say to the Insta API that we want images more recent than image id "blah", it returns image with that id too
-						//deliberate no-op
-					} else if(medias[i].type === IMAGE) {
-						var url = medias[i].images.standard_resolution.url;
-
-						if(medias[i].location) {
-							if(medias[i].location.latitude) {
-								if(!msg.location) {
-									msg.location = {};
-								}
-								msg.location.lat = medias[i].location.latitude;
-							}
-							if(medias[i].location.longitude) {
-								if(!msg.location) {
-									msg.location = {};
-								}
-								msg.location.lon = medias[i].location.longitude;
-							}
-						}
-
-						if(medias[i].created_time) {
-							msg.time = new Date(medias[i].created_time * 1000);
-						}
-
-						if (node.outputType === "link") {
-							msg.payload = url;
-							node.send(msg);
-						} else if (node.outputType === "buffer") {
-							downloadImageAndSendAsBuffer(node, url, msg);
-						}
-					}
-				}
-			} else if(areWeInPaginationRecursion === false) {
-				node.warn(RED._("instagram.warn.media-fetch-failed"));
-				return;
-			}
-			if(pagination && pagination.next && carryOnPaginating) {
-				areWeInPaginationRecursion = true;
-				pagination.next(returnPagefulsOfStuff);
-			} else {
-				node.latestSelfContentID = idOfSelfReturned;
-			}
-		};
-
-		// If we're processing user content
-		if (node.inputType === "photo") {
-			node.ig.user_media_recent("self", { count : null, min_id : node.latestSelfContentID, max_id : null}, returnPagefulsOfStuff);
-		} else if (node.inputType === "like") { // If we're processing likes
-			node.ig.user_self_liked({ count : null, max_like_id : null}, returnPagefulsOfStuff);
-		}
-	}
+	// function handleInputNodeInput(node, msg) {
+	// 	var areWeInPaginationRecursion = false;
+	//
+	// 	var idOfLikedReturned;
+	// 	var idOfSelfReturned;
+	//
+	// 	var returnPagefulsOfStuff = function(err, medias, pagination, remaining, limit) {
+	//
+	// 		var carryOnPaginating = true;
+	//
+	// 		if (err) {
+	// 			node.warn(RED._("instagram.warn.latest-media-fetch-failed", {err: err}));
+	// 		}
+	//
+	// 		if(medias) {
+	// 			for(var i = 0; i < medias.length; i++) {
+	// 				if (node.inputType === "like") { // like is a special case as per Instagram API behaviour
+	// 					if(areWeInPaginationRecursion === false) { // need to set the pointer of latest served liked image before pagination occurs
+	// 						idOfLikedReturned = medias[0].id;
+	// 					}
+	// 					if (medias[i].id === node.latestLikedID || node.latestLikedID === null) { // we finally found the image we already returned or has been there at init
+	// 						node.latestLikedID = idOfLikedReturned; // we need to assign the latest liked to the one we returned first => can only do node at the end, otherwise we'd never match break condition and always return everything
+	// 						carryOnPaginating = false;
+	// 						break;
+	// 					}
+	// 				}
+	//
+	// 				if (node.inputType === "photo" && i === 0 && (areWeInPaginationRecursion === false) ) { // only set the served self content ID to equal the first media of the first pagination page and ignore on subsequent pages
+	// 					idOfSelfReturned = medias[i].id;
+	// 				}
+	//
+	// 				if (node.inputType === "photo" && (medias[i].id === node.latestSelfContentID) ) { // if we say to the Insta API that we want images more recent than image id "blah", it returns image with that id too
+	// 					//deliberate no-op
+	// 				} else if(medias[i].type === IMAGE) {
+	// 					var url = medias[i].images.standard_resolution.url;
+	//
+	// 					if(medias[i].location) {
+	// 						if(medias[i].location.latitude) {
+	// 							if(!msg.location) {
+	// 								msg.location = {};
+	// 							}
+	// 							msg.location.lat = medias[i].location.latitude;
+	// 						}
+	// 						if(medias[i].location.longitude) {
+	// 							if(!msg.location) {
+	// 								msg.location = {};
+	// 							}
+	// 							msg.location.lon = medias[i].location.longitude;
+	// 						}
+	// 					}
+	//
+	// 					if(medias[i].created_time) {
+	// 						msg.time = new Date(medias[i].created_time * 1000);
+	// 					}
+	//
+	// 					if (node.outputType === "link") {
+	// 						msg.payload = url;
+	// 						node.send(msg);
+	// 					} else if (node.outputType === "buffer") {
+	// 						downloadImageAndSendAsBuffer(node, url, msg);
+	// 					}
+	// 				}
+	// 			}
+	// 		} else if(areWeInPaginationRecursion === false) {
+	// 			node.warn(RED._("instagram.warn.media-fetch-failed"));
+	// 			return;
+	// 		}
+	// 		if(pagination && pagination.next && carryOnPaginating) {
+	// 			areWeInPaginationRecursion = true;
+	// 			pagination.next(returnPagefulsOfStuff);
+	// 		} else {
+	// 			node.latestSelfContentID = idOfSelfReturned;
+	// 		}
+	// 	};
+	//
+	// 	// If we're processing user content
+	// 	if (node.inputType === "photo") {
+	// 		node.ig.user_media_recent("self", { count : null, min_id : node.latestSelfContentID, max_id : null}, returnPagefulsOfStuff);
+	// 	} else if (node.inputType === "like") { // If we're processing likes
+	// 		node.ig.user_self_liked({ count : null, max_like_id : null}, returnPagefulsOfStuff);
+	// 	}
+	// }
 
 	RED.nodes.registerType("instagram-credentials", InstagramCredentialsNode, {
 		credentials: {
@@ -462,8 +460,8 @@ module.exports = function(RED) {
 
 					var pData2 = JSON.parse(data2);
 
-					// NOTE: previous user_id might be offset by +/- 1 (thanks FB?!?); a call to /me retrieves the correct value
-					// also take this opportunity to grab the username text
+					// NOTE: previous user_id might be offset by +/- 1 (thanks FB?!?); making an API call to /me retrieves the correct value
+					// also take this opportunity to grab the username string
 					var userUrl = "https://graph.instagram.com/me/?access_token=" + data.access_token;
 					userUrl += "&fields=username";
 
@@ -490,7 +488,8 @@ module.exports = function(RED) {
 						} else {
 							return res.send(RED._("instagram.error.username-fetch-fail"));
 						}
-						// now we have all of the correct data, set it into credentials
+
+						// now we have all of the correct data, set it into the credentials objects
 						delete credentials.code;
 						credentials.access_token = pData2.access_token;
 						credentials.expires_in = Math.floor(Date.now()/1000) + pData2.expires_in - 15;		// give 15 seconds just in case expiry clock is somehow askew

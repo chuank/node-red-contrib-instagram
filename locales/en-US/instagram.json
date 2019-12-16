@@ -15,7 +15,8 @@
             "redirecturi": "Redirect URI",
             "authenticate": "Authenticate with Instagram",
             "instagramuser": "Instagram User",
-            "pollinterval": "Poll interval (seconds)"
+            "pollinterval": "Poll interval (seconds)",
+            "pollintervalmin": "API limit minimum: 18 seconds"
         },
         "placeholder": {
             "name": "Name"

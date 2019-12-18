@@ -70,7 +70,7 @@ module.exports = function(RED) {
 	function refreshLongLivedAccessToken(node) {
 		var now = Math.floor(Date.now()/1000);
 		if(node.credentials.expires_in - now <= 0) {
-			console.warn("IG token expired, refreshing...");
+			node.warn("IG token expired, refreshing...");
 			var refreshUrl = "https://graph.instagram.com/refresh_access_token/" +
 							"?grant_type=ig_refresh_token" +
 							"&access_token=" + node.credentials.access_token;
@@ -262,9 +262,9 @@ module.exports = function(RED) {
 					var pData2 = JSON.parse(data2);
 
 					// NOTE: previous user_id might be offset by +/- 1 (thanks FB?!?); making an API call to /me retrieves the correct value
-					// also take this opportunity to grab the username string
+					// also, take this opportunity to grab the username string
 					var userUrl = "https://graph.instagram.com/me/?access_token=" + data.access_token;
-					userUrl += "&fields=username,account_type,media_count";
+					userUrl += "&fields=username,account_type";
 
 					request.get(userUrl, function(err3, res3, data3){
 						if (err3) {
@@ -294,8 +294,6 @@ module.exports = function(RED) {
 						} else {
 							return res.send(RED._("instagram.error.account_type-fetch-fail"));
 						}
-
-						console.log("media count should be:", pData3.media_count);
 
 						// now we have all of the correct data, set it into the credentials objects
 						delete credentials.code;

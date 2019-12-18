@@ -200,7 +200,7 @@
     	defaults: {
     		instagram: { type:"instagram-credentials", required: true },
     		pollinterval: { value:60, validate:function(v) {
-    			return v >= 18;
+    			return v >= 18 || v==0;
     		}
     		},
     		name: {value:""}

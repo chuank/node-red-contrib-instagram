@@ -107,13 +107,13 @@ module.exports = function(RED) {
 			return;
 		}
 
-		retrieveIGMedia(node);
-
 		// setup an interval to call retrieveIGMedia
-		if(node.pollInterval) {			// if user specified 0, don't start pollInterval
+		if(node.pollInterval>18) {			// if user specified 0, don't start pollInterval
 			node.pollIntervalID = setInterval(function() { // self trigger
 				retrieveIGMedia(node);
 			}, node.pollInterval*1000);
+		} else {
+			retrieveIGMedia(node);
 		}
 	}
 

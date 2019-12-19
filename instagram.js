@@ -112,8 +112,6 @@ module.exports = function(RED) {
 			node.pollIntervalID = setInterval(function() { // self trigger
 				retrieveIGMedia(node);
 			}, node.pollInterval*1000);
-		} else {
-			retrieveIGMedia(node);
 		}
 	}
 

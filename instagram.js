@@ -83,7 +83,9 @@ module.exports = function(RED) {
 					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
 				}
 				if(res.statusCode !== 200) {
-					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+					node.warn("statusCode is:", res.statusCode);
+					return;
+					// return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
 				}
 
 				var pData = JSON.parse(data);

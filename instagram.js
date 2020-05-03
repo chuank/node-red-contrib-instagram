@@ -70,8 +70,7 @@ module.exports = function(RED) {
 	function refreshLongLivedAccessToken(node) {
 		var now = Math.floor(Date.now()/1000);
 
-		console.log("refreshLongLivedAccessToken:", now, node.credentials.expires_on);
-		console.log("refreshLongLivedAccessToken:", node.credentials);
+		console.log("IG refreshLongLivedAccessToken time left:", node.credentials.expires_on-now);
 
 		if(node.credentials.expires_on - now <= 0) {
 			node.warn("IG token expired, refreshing...");
@@ -88,8 +87,8 @@ module.exports = function(RED) {
 				}
 
 				if(res.statusCode !== 200) {
-					console.log("refreshLongLivedAccessToken result:", res.body);
-					node.warn("statusCode is:", res.statusCode);
+					console.log("IG refreshLongLivedAccessToken result:", res.body);
+					// node.warn("statusCode is:", res.statusCode);
 					// return;
 					// return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
 				}

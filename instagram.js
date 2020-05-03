@@ -159,7 +159,7 @@ module.exports = function(RED) {
 			app_secret: {type:"password"},
 			redirect_uri: { type:"text"},
 			access_token: {type: "password"},
-			expires_in: {type:"number"}	       // expiry date (in seconds) of long-lived access token
+			expires_on: {type:"number"}	       // expiry date (in seconds) of long-lived access token
 		}
 	});
 

@@ -71,6 +71,7 @@ module.exports = function(RED) {
 		var now = Math.floor(Date.now()/1000);
 
 		console.log("refreshLongLivedAccessToken:", now, node.credentials.expires_in);
+		console.log("refreshLongLivedAccessToken:", node.credentials);
 
 		if(node.credentials.expires_in - now <= 0) {
 			node.warn("IG token expired, refreshing...");
@@ -190,7 +191,7 @@ module.exports = function(RED) {
 			hostname: "api.instagram.com",
 			pathname: "/oauth/authorize/",
 			query: {
-				app_id: credentials.app_id,												// Instagram Basic Display API now requires 'app_id' instead of 'cliend_id'
+				app_id: credentials.app_id,												// Instagram Basic Display API now requires 'app_id' instead of 'client_id'
 				redirect_uri: credentials.redirect_uri,
 				response_type: "code",
 				scope: "user_profile,user_media",

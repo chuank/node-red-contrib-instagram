@@ -94,7 +94,8 @@ module.exports = function(RED) {
 				var pData = JSON.parse(data);
 				node.credentials.access_token = pData.access_token;
 
-				console.log(pData);
+				console.log("accesstoken:", node.credentials.access_token);
+				console.log("pData:", pData);
 
 				node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give extra 15 seconds just in case expiry clock is somehow askew
 

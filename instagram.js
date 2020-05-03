@@ -86,7 +86,7 @@ module.exports = function(RED) {
 					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
 				}
 
-				console.log("refreshLongLivedAccessToken result:", res);
+				console.log("refreshLongLivedAccessToken result:", res.body);
 
 				if(res.statusCode !== 200) {
 					node.warn("statusCode is:", res.statusCode);

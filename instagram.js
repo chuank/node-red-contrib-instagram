@@ -1,7 +1,7 @@
 /**
  *
  * node-red-contrib-instagram
- * Copyright 2019 Chuan Khoo.
+ *  Copyright 2019, 2020 Chuan Khoo.
  * www.chuank.com
  *
  * Rewritten from deprecated source from node-red-node-instagram
@@ -69,6 +69,9 @@ module.exports = function(RED) {
 
 	function refreshLongLivedAccessToken(node) {
 		var now = Math.floor(Date.now()/1000);
+
+		console.log("refreshLongLivedAccessToken:", now, node.credentials.expires_in);
+
 		if(node.credentials.expires_in - now <= 0) {
 			node.warn("IG token expired, refreshing...");
 			var refreshUrl = "https://graph.instagram.com/refresh_access_token/" +
@@ -90,6 +93,9 @@ module.exports = function(RED) {
 
 				var pData = JSON.parse(data);
 				node.credentials.access_token = pData.access_token;
+
+				console.log(pData);
+
 				node.credentials.expires_in = Math.floor(Date.now()/1000) + pData.expires_in - 15;		// give extra 15 seconds just in case expiry clock is somehow askew
 
 				RED.nodes.addCredentials(node.id, node.credentials);

@@ -22,7 +22,7 @@
             "name": "Name"
         },
         "tip": {
-            "redirect": "<p>Please configure Instagram to accept the following <b>Redirect URL</b> for authentication of your application: </p>\n<code>__constructedURI__</code>"
+            "redirect": "<p>Under your Facebook Developers menu > Instagram Basic Display, add the following <b>OAuth Redirect URI</b> to authentication of your application: </p>\n<code>__constructedURI__</code>"
         },
         "warn": {
             "image-not-sent": "Instagram node has failed to buffer up an image. Image was not sent.\n__error__\n__response__",
@@ -43,6 +43,7 @@
             "csrf-token-mismatch": "CSRF token mismatch, possible cross-site request forgery attempt.",
             "no-required-code": "The callback from Instagram did not contain a required code",
             "unexpected-statuscode": "Instagram replied with the unexpected HTTP status code of __statusCode__\nDetails:\n__data__",
+            "unexpected-JSON": "Instagram did not return a valid JSON.\nDetails:\n__data__",
             "request-error": "request error:__err__",
             "oauth-error": "oauth error: __error__",
             "no-ui-credentials": "ERROR: Received query from UI without the needed credentials",

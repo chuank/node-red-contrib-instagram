@@ -1,7 +1,7 @@
 <!--
- node-red-contrib-instagram
- Copyright 2019, 2020 Chuan Khoo.
- www.chuank.com
+  node-red-contrib-instagram
+  2019-2021 Chuan Khoo
+  www.chuank.com
 
  Rewritten from deprecated source from node-red-node-instagram
  Copyright 2014 IBM Corp.
@@ -73,10 +73,21 @@
 </script>
 
 <script type="text/x-red" data-help-name="instagram">
-    <p>Get photos from Instagram via the Facebook/Instagram Basic Display API.</p>
+    <p>Get media (IMAGE, VIDEO and CAROUSEL_ALBUM) from Instagram via the Facebook Instagram Basic Display API.</p>
     <p>With the adoption of Facebook Graph API for Instagram, stricter permissions and OAuth tokens are now a requirement.</p>
-    <p>This node provides login, authentication and the provisioning of a long-life access token which is also automatically refreshed by the node.</p>
-    <p>Setting an interval allows regular polling of the Instagram API for new content. Set to 0 for manual triggering. The first element in the returned array is always the latest item.</p>
+    <p>This node provides login, authentication and the provisioning of a long-life access token which is also automatically refreshed by the configuration node.</p>
+	<h3>Properties</h3>
+	<dl class="message-properties">
+        <dt>user <span class="property-type">credentials</span></dt>
+        <dd> authenticate an Instagram account for use with this node</dd>
+        <dt>poll interval <span class="property-type">number</span></dt>
+        <dd> set an automated interval (in seconds) to query the Instagram account; 0 to disable. Note Facebook's platform rate limit of 200 per hour (i.e. every 18 seconds)</dd>
+        <dt>name <span class="property-type">string</span></dt>
+        <dd> name of node to be displayed in editor</dd>
+    </dl>
+	<h3>Details</h3>
+	<p>Refer to the <a href="https://developers.facebook.com/docs/instagram-basic-display-api/" target="_blank">Facebook Developers page</a> for limitations</p>
+    <p>The first element in the returned array is the latest item.</p>
     <p>Up to 10K of the most recent media elements are returned.</p>
     <p>Some initial setup of your Facebook Developer account and app is needed. Follow the <a href="https://developers.facebook.com/docs/instagram-basic-display-api/getting-started" target="_blank">Getting Started guide</a> on Facebook.</p>
 </script>
@@ -208,6 +219,8 @@
     	color:"#889FB3",
     	inputs:1,
     	outputs:1,
+		inputLabels: "send anything to trigger query",
+		outputLabels: "Array",
     	icon: "instagram.png",
     	label: function() {
     		return this.name||this._("instagram.label.instagram");

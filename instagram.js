@@ -1,7 +1,7 @@
 /**
  *
  * node-red-contrib-instagram
- *  Copyright 2019, 2020 Chuan Khoo.
+ * 2019-2021 Chuan Khoo.
  * www.chuank.com
  *
  * Rewritten from deprecated source from node-red-node-instagram
@@ -30,12 +30,13 @@ module.exports = function(RED) {
 
 		var node = this;
 
-		// IG's beta implementation of long-lived tokens (60 days) – credential node will check and refresh automatically after 60 days
+		// IG's implementation of long-lived tokens (60 days) – credential node will check and refresh automatically after (60 days - 1min)
 		refreshLongLivedAccessToken(node);
 
 		node.refreshTokenIntervalID = setInterval(function() {
+			node.log('checking if token has expired...');
 			refreshLongLivedAccessToken(node);
-		}, 900*1000);													// check for expired token every 15 minutes
+		}, 900*1000);		// check for expired token every 15 minutes
 	}
 
 	function InstagramNode(n) {
@@ -53,7 +54,7 @@ module.exports = function(RED) {
 		initializeNode(node);
 
 		node.on("input", function(msg) {
-			// any input will cause the node to trigger the GET request
+			// allow any input into node to trigger the GET request
 			msg = {};
 			retrieveIGMedia(node);
 		});
@@ -70,10 +71,11 @@ module.exports = function(RED) {
 	function refreshLongLivedAccessToken(node) {
 		var now = Math.floor(Date.now()/1000);
 
-		console.log("IG refreshLongLivedAccessToken time left:", node.credentials.expires_on-now);
+		let numDays = (node.credentials.expires_on-now)/60/60/24;
+		node.log("refreshLongLivedAccessToken time left: " + numDays.toFixed(2) +" days");
 
 		if(node.credentials.expires_on - now <= 0) {
-			node.warn("IG token expired, refreshing...");
+			node.warn("token expired, refreshing...");
 			var refreshUrl = "https://graph.instagram.com/refresh_access_token/" +
 							"?grant_type=ig_refresh_token" +
 							"&access_token=" + node.credentials.access_token;
@@ -87,17 +89,25 @@ module.exports = function(RED) {
 				}
 
 				if(res.statusCode !== 200) {
-					console.log("IG refreshLongLivedAccessToken result:", res.body);
+					node.error("refreshLongLivedAccessToken error:", res.body);
 					// node.warn("statusCode is:", res.statusCode);
 					// return;
-					// return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+				} else {
+					let pData;
+					try {
+						pData = JSON.parse(data);
+					} catch(e) {
+						return res.send(RED._("instagram.error.unexpected-JSON", {statusCode: res.statusCode, data: data}));
+					}
+
+					node.credentials.access_token = pData.access_token;
+					node.credentials.expires_on = Math.floor(Date.now()/1000) + pData.expires_in - 60;		// give extra 60 seconds just in case expiry clock is somehow askew
+
+					let numDays = (pData.expires_in - 60)/60/60/24;
+					node.log("refreshLongLivedAccessToken success, new token expires in: " + numDays.toFixed(2) + " days");
+					RED.nodes.addCredentials(node.id, node.credentials);
 				}
-
-				var pData = JSON.parse(data);
-				node.credentials.access_token = pData.access_token;
-				node.credentials.expires_on = Math.floor(Date.now()/1000) + pData.expires_in - 60;		// give extra 60 seconds just in case expiry clock is somehow askew
-
-				RED.nodes.addCredentials(node.id, node.credentials);
 			});
 		}
 	}
@@ -114,8 +124,12 @@ module.exports = function(RED) {
 			return;
 		}
 
-		// setup an interval to call retrieveIGMedia
-		if(node.pollInterval>18) {			// if user specified 0, don't start pollInterval
+		// setup an interval to call retrieveIGMedia if requested
+		// note FB/IG rate limits at 200/hr i.e. one call per 18 seconds
+		if(node.pollInterval!=0) {			// if user specified 0, don't start pollInterval
+
+			if(node.pollInterval<18) node.pollInterval = 18;	// force to 18 secs if any other value < 18 (and not 0) is entered
+
 			node.pollIntervalID = setInterval(function() { // self trigger
 				retrieveIGMedia(node);
 			}, node.pollInterval*1000);
@@ -140,8 +154,8 @@ module.exports = function(RED) {
 
 			var media = JSON.parse(data).data;
 
-			// for now, this call seems to retrieve ALL of a user's media with a 10k count limit
-			// field expansion to apply a limit is unsupported!
+			// current Basic Display API retrieves ALL of a user's media up to a 10k count limit
+			// and includes IMAGE, VIDEO and CAROUSEL_ALBUM
 
 			var msg = {};
 			msg.payload = media;
@@ -154,8 +168,8 @@ module.exports = function(RED) {
 			user_id: {type:"text"},
 			username: {type:"text"},
 			account_type: {type:"text"},
-			app_id: {type:"text"},
-			app_secret: {type:"password"},
+			client_id: {type:"text"},
+			client_secret: {type:"password"},
 			redirect_uri: { type:"text"},
 			access_token: {type: "password"},
 			expires_on: {type:"number"}	       // expiry date (in seconds) of long-lived access token
@@ -164,6 +178,7 @@ module.exports = function(RED) {
 
 	RED.nodes.registerType("instagram", InstagramNode);
 
+	// setup the IG Authorization Window trigger (called by #node-config-start-auth mousedown event)
 	RED.httpAdmin.get("/instagram-credentials/auth", function(req, res) {
 		var node_id = req.query.node_id;
 
@@ -185,7 +200,7 @@ module.exports = function(RED) {
 			hostname: "api.instagram.com",
 			pathname: "/oauth/authorize/",
 			query: {
-				app_id: credentials.app_id,												// Instagram Basic Display API now requires 'app_id' instead of 'client_id'
+				client_id: credentials.app_id,
 				redirect_uri: credentials.redirect_uri,
 				response_type: "code",
 				scope: "user_profile,user_media",
@@ -197,6 +212,7 @@ module.exports = function(RED) {
 		RED.nodes.addCredentials(node_id, credentials);
 	});
 
+	// IG Authorization Window will call this url on successful permissioning
 	RED.httpAdmin.get("/instagram-credentials/auth/callback", function(req, res) {
 		var state = req.query.state.split(":");
 		var node_id = state[0];
@@ -212,23 +228,23 @@ module.exports = function(RED) {
 			return res.status(401).send(RED._("instagram.error.csrf-token-mismatch"));
 		}
 
-		RED.nodes.deleteCredentials(node_id); // we don't want to keep the csrfToken
-		// from now on, credentials are in memory only
+		RED.nodes.deleteCredentials(node_id); // we don't need to keep the csrfToken in credentials
 		delete credentials.csrfToken;
 
 		if(!req.query.code) {
 			return res.status(400).send(RED._("instagram.error.no-required-code"));
 		}
 
+		// this captured 'code' from IG's Auth is then used to exchange for a short-lived access token
 		credentials.code = req.query.code;
 
-		// ready to send out for a short-lived access token (valid for 1hr)
+		// send out for a short-lived access token (valid for 1hr)
 		request.post({
 			url: "https://api.instagram.com/oauth/access_token",
 			json: true,
 			form: {
-				app_id: credentials.app_id,
-				app_secret: credentials.app_secret,
+				client_id: credentials.app_id,
+				client_secret: credentials.app_secret,
 				grant_type: "authorization_code",
 				redirect_uri: credentials.redirect_uri,
 				code: credentials.code
@@ -264,7 +280,12 @@ module.exports = function(RED) {
 						return res2.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res2.statusCode, data: data2}));
 					}
 
-					var pData2 = JSON.parse(data2);
+					var pData2;
+					try {
+						pData2 = JSON.parse(data2);	
+					} catch (e) {
+						return res2.send(RED._("instagram.error.unexpected-JSON", {statusCode: res2.statusCode, data: data2}));
+					}
 
 					// NOTE: previous user_id might be offset by +/- 1 (thanks FB?!?); making an API call to /me retrieves the correct value
 					// also, take this opportunity to grab the username string
@@ -282,22 +303,27 @@ module.exports = function(RED) {
 							return res3.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res3.statusCode, data: data3}));
 						}
 
-						var pData3 = JSON.parse(data3);
+						var pData3;
+						try {
+							pData3 = JSON.parse(data3);	
+						} catch (e) {
+							return res3.send(RED._("instagram.error.unexpected-JSON", {statusCode: res3.statusCode, data: data3}));
+						}
 
 						if(pData3.id) {
 							credentials.user_id = pData3.id;
 						} else {
-							return res.send(RED._("instagram.error.user_id-fetch-fail"));
+							return res3.send(RED._("instagram.error.user_id-fetch-fail"));
 						}
 						if(pData3.username) {
 							credentials.username = pData3.username;
 						} else {
-							return res.send(RED._("instagram.error.username-fetch-fail"));
+							return res3.send(RED._("instagram.error.username-fetch-fail"));
 						}
-						if(pData3.username) {
+						if(pData3.account_type) {
 							credentials.account_type = pData3.account_type;
 						} else {
-							return res.send(RED._("instagram.error.account_type-fetch-fail"));
+							return res3.send(RED._("instagram.error.account_type-fetch-fail"));
 						}
 
 						// now we have all of the correct data, set it into the credentials object

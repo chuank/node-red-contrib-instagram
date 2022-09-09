@@ -74,7 +74,7 @@ module.exports = function(RED) {
 		let numDays = (node.credentials.expires_on-now)/60/60/24;
 		node.log("refreshLongLivedAccessToken time left: " + numDays.toFixed(2) +" days");
 
-		if(node.credentials.expires_on - now <= 0) {
+		if(numDays <= 0) {
 			node.warn("token expired, refreshing...");
 			var refreshUrl = "https://graph.instagram.com/refresh_access_token/" +
 							"?grant_type=ig_refresh_token" +
@@ -87,6 +87,8 @@ module.exports = function(RED) {
 				if (data.error) {
 					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
 				}
+
+				console.log("refreshLongLivedAccessToken/res is:", res);
 
 				if(res.statusCode !== 200) {
 					node.error("refreshLongLivedAccessToken error:", res.body);

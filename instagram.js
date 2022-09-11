@@ -81,30 +81,26 @@ module.exports = function(RED) {
 							"&access_token=" + node.credentials.access_token;
 
 			request.get(refreshUrl, function(err, res, data){
-				if (err) {
-					return res.send(RED._("instagram.error.request-error", {err: err}));
-				}
-				if (data.error) {
-					return res.send(RED._("instagram.error.oauth-error", {error: data.error}));
+				let pData;
+				try {
+						pData = JSON.parse(data);
+				} catch(e) {
+						return node.error(RED._("instagram.error.unexpected-JSON"));
 				}
 
-				console.log("refreshLongLivedAccessToken/res is:", res);
+				if (err) {
+						return node.error(RED._("instagram.error.request-error", {err: err}));
+				}
+				if (data.error) {
+						return node.error(RED._("instagram.error.oauth-error", {error: data.error}));
+				}
 
 				if(res.statusCode !== 200) {
 					node.error("refreshLongLivedAccessToken error:", res.body);
-					// node.warn("statusCode is:", res.statusCode);
-					// return;
-					return res.send(RED._("instagram.error.unexpected-statuscode", {statusCode: res.statusCode, data: data}));
+					return node.error(RED._("instagram.error.unexpected-statuscode", {statusCode: pData.error.code, data: pData.error.message}));
 				} else {
-					let pData;
-					try {
-						pData = JSON.parse(data);
-					} catch(e) {
-						return res.send(RED._("instagram.error.unexpected-JSON", {statusCode: res.statusCode, data: data}));
-					}
-
 					node.credentials.access_token = pData.access_token;
-					node.credentials.expires_on = Math.floor(Date.now()/1000) + pData.expires_in - 60;		// give extra 60 seconds just in case expiry clock is somehow askew
+					node.credentials.expires_on = Math.floor(Date.now()/1000) + pData.expires_in - 60;              // give extra 60 se$
 
 					let numDays = (pData.expires_in - 60)/60/60/24;
 					node.log("refreshLongLivedAccessToken success, new token expires in: " + numDays.toFixed(2) + " days");
